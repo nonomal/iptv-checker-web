@@ -1,7 +1,7 @@
 {
-  "name": "iptv-checker",
+  "name": "iptv-checker-web",
   "private": true,
-  "description": "check your playlist is available",
+  "description": "a website for iptv-checker",
   "author": "知敏studio",
   "homepage_url": "https://github.com/zhimin-dev/iptv-checker",
   "version": "2.15.2",

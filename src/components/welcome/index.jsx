@@ -23,18 +23,22 @@ import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import utils from './../../utils/common'
+import TaskListView from './task';
 
 const ModIHaveM3uLink = 0
 const ModIHaveM3uContent = 1
 const ModPublicSource = 2
 const ModUploadFromLocal = 3
-const ModWatchOnline = 4
+const TaskList = 4
+const SystemInfo = 5
 
 let selectOptionWithNoWatch = [
-  { 'mod': ModIHaveM3uLink, "name": "我有订阅源链接" },
-  { 'mod': ModIHaveM3uContent, "name": "我有订阅源内容" },
+  { 'mod': ModIHaveM3uLink, "name": "订阅源链接" },
+  { 'mod': ModIHaveM3uContent, "name": "订阅源内容" },
   { 'mod': ModPublicSource, "name": "公共订阅源" },
   { 'mod': ModUploadFromLocal, "name": "本地上传" },
+  { 'mod': TaskList, "name": "任务列表" },
+  { 'mod': SystemInfo, "name": "系统信息" },
 ]
 
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -46,7 +50,7 @@ const nowVersion = _package.version;
 const githubLink = _package.homepage_url
 const copyright = _package.author
 
-const boxMaxWith = 600
+const boxMaxWith = 680
 
 const oneFrame = {
   marginBottom: '10px',
@@ -99,8 +103,11 @@ export default function HorizontalLinearStepper() {
   const [showError, setShowError] = React.useState(false)
   const [watchList, setWatchList] = React.useState([])
   const [localFileName, setLocalFileName] = React.useState('')
+  const [systemInfo, setSystemInfo] = React.useState(null)
+  const [taskList, setTaskList] = React.useState([])
 
   useEffect(() => {
+    system_info()
     fetchCommonLink()
     _mainContext.clearDetailData()
     fetchWatchOnlineData()
@@ -154,6 +161,15 @@ export default function HorizontalLinearStepper() {
     setCustomUrl(e.target.value)
   }
 
+  const system_info = () => {
+    axios.get("/system/info").then(res => {
+      setSystemInfo(res.data)
+    }).catch(e => {
+      setShowError(true)
+      setErrorMsg("后端服务异常，请检查")
+    });
+  }
+
   const handleConfirm = async (e) => {
     setLoading(true);
     try {
@@ -177,7 +193,7 @@ export default function HorizontalLinearStepper() {
         }
         let bodies = []
         for (let i = 0; i < targetUrl.length; i++) {
-          if(utils.isValidUrl(targetUrl[i])) {
+          if (utils.isValidUrl(targetUrl[i])) {
             let res = await axios.get(_mainContext.getM3uBody(targetUrl[i]))
             if (res.status === 200) {
               bodies.push(res.data)
@@ -241,7 +257,7 @@ export default function HorizontalLinearStepper() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      height: '80vh'
+      paddingTop: '100px',
     }}>
       <Snackbar open={showError} autoHideDuration={6000} onClose={handleCloseSnackBar}>
         <Alert onClose={handleCloseSnackBar} severity="error" sx={{ width: '100%' }}>
@@ -249,7 +265,7 @@ export default function HorizontalLinearStepper() {
         </Alert>
       </Snackbar>
       <img src={LogoSvg} height="70" style={{ backgroundColor: "#fff", borderRadius: '20px' }} />
-      <h1 style={{ fontSize: '30px' }}>IPTV Checker<span style={{ fontSize: "12px" }}>{nowVersion}</span></h1>
+      <h1 style={{ fontSize: '30px' }}>IPTV Checker</h1>
       <Box sx={oneFrame}>
         <Box >
           <Tabs value={mod} onChange={handleTabChange} aria-label="basic tabs example">
@@ -289,38 +305,28 @@ export default function HorizontalLinearStepper() {
             </Select>
           </FormControl>
         </TabPanel>
-        <TabPanel mod={mod} index={ModWatchOnline}>
-          <Box>
-            <Button variant="contained" sx={{ margin: "5px" }} onClick={() => goToWatchPage(null)}>我有直播源m3u8地址</Button>
-            {
-              watchList.map((value, index) => (
-                <Box key={index}>
-                  <div style={{ color: '#b1b1b1' }}>{value.name}</div>
-                  <div style={{ display: "flex" }}>
-                    {
-                      value.list.map((val, ind) => (
-                        <div style={{
-                          margin: '5px',
-                          cursor: 'pointer'
-                        }} onClick={() => goToWatchPage(val)} key={ind}>
-                          {val.name}
-                        </div>
-                      ))
-                    }
-                  </div>
-                </Box>
-              ))
-            }
-          </Box>
-        </TabPanel>
         <TabPanel mod={mod} index={ModUploadFromLocal}>
           <Button variant="contained" component="label">
             {localFileName === '' ? 'Upload' : localFileName}
             <input hidden type="file" onChange={HandleLocalUpload} />
           </Button>
         </TabPanel>
+        <TabPanel mod={mod} index={TaskList}>
+          <TaskListView></TaskListView>
+        </TabPanel>
+        <TabPanel mod={mod} index={SystemInfo}>
+          <div style={{ display: 'flex', flexDirection: 'column', fontSize: '16px' }}>
+            <span >当前{
+              systemInfo !== null ? (
+                systemInfo.can_ipv6 ? '支持' : '不支持'
+              ) : '后端服务未启动，暂不清楚是否支持'
+            }ipv6</span>
+            <span >前端版本号:{nowVersion}</span>
+            <span >后端版本号:{systemInfo !== null ? systemInfo.version : '未知'}</span>
+          </div>
+        </TabPanel>
         {
-          mod !== ModWatchOnline ? (
+          (mod !== TaskList && mod !== SystemInfo) ? (
             <Box sx={{
               display: 'flex',
               justifyContent: 'flex-end',

@@ -334,13 +334,13 @@ export const MainContextProvider = function ({ children }) {
 
     const getCheckUrl = (url, timeout) => {
         let _timeout = parseInt(timeout, 10)
-        return '/check-url-is-available?url=' + url + "&timeout=" + (isNaN(_timeout) ? '-1' : _timeout)
+        return '/check/url-is-available?url=' + url + "&timeout=" + (isNaN(_timeout) ? '-1' : _timeout)
     }
 
     const getM3uBody = (url, timeout) => {
         let _timeout = parseInt(timeout, 10)
         log(url, _timeout)
-        return '/fetch-m3u-body?url=' + url + "&timeout=" +  (isNaN(_timeout) ? '-1' : _timeout)
+        return '/fetch/m3u-body?url=' + url + "&timeout=" +  (isNaN(_timeout) ? '-1' : _timeout)
     }
 
     const prepareCheckData = () => {

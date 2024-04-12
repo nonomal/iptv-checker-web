@@ -28,13 +28,14 @@ import Snackbar from '@mui/material/Snackbar';
 import Divider from '@mui/material/Divider';
 
 const run_type_list = [{ "value": "EveryDay", "name": "每天" }, { "value": "EveryHour", "name": "每小时" }]
+const output_folder = "static/output/"
 
 const defaultValue = {
     "original": {
         "urls": [],
-        "contents": "",
         "result_name": "",
-        "md5": ""
+        "md5": "",
+        "run_type": "EveryDay",
     },
     "id": "",
     "create_time": 0,
@@ -53,14 +54,13 @@ function TaskForm(props) {
 
     const handleClose = () => {
         onClose();
-    };
+    }
 
     const handleSaveClick = () => {
-        // let saveTask = JSON.parse(JSON.stringify(task));
-        // saveTask.original.result_name = 'static/'+saveTask.original.result_name+".m3u"
+        console.log(task)
         handleSave(task)
         onClose();
-    };
+    }
 
     const handleDeleteClick = () => {
         handleDelete(task)
@@ -93,8 +93,8 @@ function TaskForm(props) {
     const handleChangeRunType = (e) => {
         setTask({
             ...task,
-            task_info: {
-                ...task.task_info,
+            original: {
+                ...task.original,
                 run_type: e.target.value
             }
         });
@@ -121,7 +121,7 @@ function TaskForm(props) {
             ...task,
             original: {
                 ...task.original,
-                urls: newUrls
+                urls: newUrls,
             }
         });
     }
@@ -178,7 +178,7 @@ function TaskForm(props) {
                                     style={{ width: '100%' }}
                                     name="resultName"
                                     endAdornment={<InputAdornment position="end">.m3u</InputAdornment>}
-                                    startAdornment={<InputAdornment position="start">static/</InputAdornment>}
+                                    startAdornment={<InputAdornment position="start">{output_folder}</InputAdornment>}
                                     aria-describedby="outlined-weight-helper-text"
                                     label="输出文件名"
                                     value={task.original.result_name}
@@ -211,7 +211,7 @@ function TaskForm(props) {
                                 <Button variant="outlined" onClick={() => addNewM3uLink()}>添加在线链接</Button>
                                 <Button variant="contained" component="label">
                                     本地上传m3u文件
-                                    <input hidden accept="image/*" multiple type="file" onChange={handleFileUpload} />
+                                    <input hidden accept="*" multiple type="file" onChange={handleFileUpload} />
                                 </Button>
                             </FormControl>
                             <Divider />
@@ -225,7 +225,7 @@ function TaskForm(props) {
                                 <Select
                                     labelId="demo-simple-select-standard-label"
                                     id="demo-simple-select-standard"
-                                    value={task.task_info.run_type}
+                                    value={task.original.run_type}
                                     label="运行类型"
                                     onChange={handleChangeRunType}
                                 >
@@ -379,8 +379,9 @@ export default function TaskList(props) {
     const task_add = (value) => {
         axios.post("/tasks/add", {
             "urls": value.original.urls,
-            "result_name": 'static/' + value.original.result_name + ".m3u",
-            "md5": ""
+            "result_name": output_folder + value.original.result_name + ".m3u",
+            "md5": "",
+            "run_type": value.original.run_type,
         }).then(res => {
             if (res.data.code === "200") {
                 get_task_list()

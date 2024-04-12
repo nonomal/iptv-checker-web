@@ -7,11 +7,11 @@ export default defineConfig({
   base:'./',
   server: {
     proxy: {
-      '/check-url-is-available': {
+      '^/check/.*': {
         target: 'http://127.0.0.1:8089',
         changeOrigin: true,
       },
-      '/fetch-m3u-body': {
+      '^/fetch/.*': {
         target: 'http://127.0.0.1:8089',
         changeOrigin: true,
       },

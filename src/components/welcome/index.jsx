@@ -9,6 +9,7 @@ import Select from '@mui/material/Select';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { MainContext } from './../../context/main';
 import axios from 'axios'
+import Tooltip from '@mui/material/Tooltip';
 import CheckIcon from '@mui/icons-material/Check';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
@@ -24,6 +25,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import utils from './../../utils/common'
 import TaskListView from './task';
+import GitHubIcon from '@mui/icons-material/GitHub';
 
 const ModIHaveM3uLink = 0
 const ModIHaveM3uContent = 1
@@ -37,7 +39,7 @@ let selectOptionWithNoWatch = [
   { 'mod': ModIHaveM3uContent, "name": "订阅源内容" },
   { 'mod': ModPublicSource, "name": "公共订阅源" },
   { 'mod': ModUploadFromLocal, "name": "本地上传" },
-  { 'mod': TaskList, "name": "任务列表" },
+  { 'mod': TaskList, "name": "定时任务" },
   { 'mod': SystemInfo, "name": "系统信息" },
 ]
 
@@ -251,6 +253,10 @@ export default function HorizontalLinearStepper() {
     }
   }
 
+  const openLink = (url) => {
+    window.open(url)
+  }
+
   return (
     <Box sx={{
       display: 'flex',
@@ -266,6 +272,11 @@ export default function HorizontalLinearStepper() {
       </Snackbar>
       <img src={LogoSvg} height="70" style={{ backgroundColor: "#fff", borderRadius: '20px' }} />
       <h1 style={{ fontSize: '30px' }}>IPTV Checker</h1>
+      <Tooltip title="❤️❤️❤️帮忙点个star，万分感谢！！！❤️❤️❤️">
+        <Button onClick={() => openLink(githubLink)} startIcon={<GitHubIcon />}>
+          {copyright}
+        </Button>
+      </Tooltip>
       <Box sx={oneFrame}>
         <Box >
           <Tabs value={mod} onChange={handleTabChange} aria-label="basic tabs example">
@@ -318,9 +329,17 @@ export default function HorizontalLinearStepper() {
           <div style={{ display: 'flex', flexDirection: 'column', fontSize: '16px' }}>
             <span >当前{
               systemInfo !== null ? (
-                systemInfo.can_ipv6 ? '支持' : '不支持'
+                systemInfo.can_ipv6 ? '支持' : (
+                  <span style={{ color: 'red', fontWeight: 'bold', fontSize: 20 }}>不支持</span>
+                )
               ) : '后端服务未启动，暂不清楚是否支持'
-            }ipv6</span>
+            }IPV6
+              {
+                systemInfo !== null && !systemInfo.can_ipv6 ? (
+                  '(需要您的网络环境支持才可以检测IPV6源！！！)'
+                ) : ''
+              }
+            </span>
             <span >前端版本号:{nowVersion}</span>
             <span >后端版本号:{systemInfo !== null ? systemInfo.version : '未知'}</span>
           </div>
@@ -344,12 +363,6 @@ export default function HorizontalLinearStepper() {
             </Box>
           ) : ''
         }
-      </Box>
-      <Box sx={{
-        position: 'absolute',
-        bottom: 0
-      }}>
-        <a target="_blank" href={githubLink}>@{copyright}</a>
       </Box>
     </Box>
   );

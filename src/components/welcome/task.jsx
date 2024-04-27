@@ -23,12 +23,14 @@ import Select from '@mui/material/Select';
 import Tooltip from '@mui/material/Tooltip';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
-import FormHelperText from '@mui/material/FormHelperText';
 import Snackbar from '@mui/material/Snackbar';
-import Divider from '@mui/material/Divider';
+import PublicIcon from '@mui/icons-material/Public';
+import UploadIcon from '@mui/icons-material/Upload';
+import AddIcon from '@mui/icons-material/Add';
 
 const run_type_list = [{ "value": "EveryDay", "name": "每天" }, { "value": "EveryHour", "name": "每小时" }]
 const output_folder = "static/output/"
+const output_extenion = ".m3u"
 
 const defaultValue = {
     "original": {
@@ -57,7 +59,6 @@ function TaskForm(props) {
     }
 
     const handleSaveClick = () => {
-        console.log(task)
         handleSave(task)
         onClose();
     }
@@ -80,6 +81,7 @@ function TaskForm(props) {
 
     useEffect(() => {
         if (formValue !== null) {
+            formValue.original.result_name = formValue.original.result_name.replace(output_folder, "").replace(output_extenion, "")
             setTask(formValue)
         } else {
             let default_data = JSON.parse(JSON.stringify(defaultValue))
@@ -167,82 +169,75 @@ function TaskForm(props) {
     return (
         <Dialog onClose={handleClose} open={open}>
             <div style={{ padding: '40px', width: '500px' }}>
-                {
-                    task.id === '' ? (
-                        <div>
-                            <FormControl fullWidth style={{
-                                padding: "0 0 20px",
-                            }}>
-                                <InputLabel htmlFor="outlined-adornment-amount">结果文件名</InputLabel>
-                                <OutlinedInput
-                                    style={{ width: '100%' }}
-                                    name="resultName"
-                                    endAdornment={<InputAdornment position="end">.m3u</InputAdornment>}
-                                    startAdornment={<InputAdornment position="start">{output_folder}</InputAdornment>}
-                                    aria-describedby="outlined-weight-helper-text"
-                                    label="输出文件名"
-                                    value={task.original.result_name}
-                                    onChange={changeResultName}
-                                />
-                            </FormControl>
-                            <Divider />
-                            <FormControl fullWidth style={{
-                                padding: "0 0 20px",
-                            }}>
-                                检查文件列表
-                            </FormControl>
-                            <FormControl fullWidth style={{
-                                padding: "0 0 20px",
-                            }}>
-                                {
-                                    task.original.urls.map((value, index) => (
-                                        <div style={{ display: 'flex' }} key={index}>
-                                            <TextField style={{ width: '100%' }} id="standard-basic" variant="standard" name={"url-" + index} value={value} onChange={changeUrls} />
-                                            <Button variant="text" onClick={() => handleDelRow(index)}>删除</Button>
-                                        </div>
-                                    ))
-                                }
-                            </FormControl>
-                            <FormControl fullWidth style={{
-                                padding: "0 0 20px", display: 'flex',
-                                flexDirection: 'row',
-                                justifyContent: 'space-between'
-                            }}>
-                                <Button variant="outlined" onClick={() => addNewM3uLink()}>添加在线链接</Button>
-                                <Button variant="contained" component="label">
-                                    本地上传m3u文件
-                                    <input hidden accept="*" multiple type="file" onChange={handleFileUpload} />
-                                </Button>
-                            </FormControl>
-                            <Divider />
-                            <FormControl fullWidth style={{
-                                padding: "0 0 20px",
-                            }}>
-                                定时检查时间
-                            </FormControl>
-                            <FormControl fullWidth>
-                                <InputLabel id="demo-simple-select-standard-label">运行类型</InputLabel>
-                                <Select
-                                    labelId="demo-simple-select-standard-label"
-                                    id="demo-simple-select-standard"
-                                    value={task.original.run_type}
-                                    label="运行类型"
-                                    onChange={handleChangeRunType}
-                                >
-                                    {
-                                        run_type_list.map((value, index) => (
-                                            <MenuItem value={value.value} key={index}>{value.name}</MenuItem>
-                                        ))
-                                    }
-                                </Select>
-                            </FormControl>
-                        </div>
-                    ) : ''}
+
+                <div>
+                    <FormControl fullWidth style={{
+                        padding: "0 0 20px",
+                    }}>
+                        检查文件列表
+                    </FormControl>
+                    <FormControl fullWidth style={{
+                        padding: "0 0 20px",
+                    }}>
+                        {
+                            task.original.urls.map((value, index) => (
+                                <div style={{ display: 'flex' }} key={index}>
+                                    <TextField style={{ width: '100%' }} disabled={value.startsWith("static")} id="standard-basic" variant="standard" name={"url-" + index} value={value} onChange={changeUrls} />
+                                    <Button variant="text" onClick={() => handleDelRow(index)}>删除</Button>
+                                </div>
+                            ))
+                        }
+                    </FormControl>
+                    <FormControl fullWidth style={{
+                        padding: "0 0 20px", display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'space-between'
+                    }}>
+                        <Button variant="outlined" onClick={() => addNewM3uLink()} startIcon={<PublicIcon />}>添加在线链接</Button>
+                        <Button variant="contained" component="label" startIcon={<UploadIcon />}>
+                            本地上传m3u文件
+                            <input hidden accept="*" multiple type="file" onChange={handleFileUpload} />
+                        </Button>
+                    </FormControl>
+                    <FormControl fullWidth style={{
+                        margin: "0 0 20px",
+                    }}>
+                        <InputLabel id="demo-simple-select-standard-label">定时检查时间</InputLabel>
+                        <Select
+                            labelId="demo-simple-select-standard-label"
+                            id="demo-simple-select-standard"
+                            value={task.original.run_type}
+                            label="定时检查时间"
+                            onChange={handleChangeRunType}
+                        >
+                            {
+                                run_type_list.map((value, index) => (
+                                    <MenuItem value={value.value} key={index}>{value.name}</MenuItem>
+                                ))
+                            }
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth style={{
+                        margin: "20px 0 20px",
+                    }}>
+                        <InputLabel htmlFor="outlined-adornment-amount">结果文件名</InputLabel>
+                        <OutlinedInput
+                            style={{ width: '100%' }}
+                            name="resultName"
+                            endAdornment={<InputAdornment position="end">{output_extenion}</InputAdornment>}
+                            startAdornment={<InputAdornment position="start">{output_folder}</InputAdornment>}
+                            aria-describedby="outlined-weight-helper-text"
+                            label="输出文件名"
+                            value={task.original.result_name}
+                            onChange={changeResultName}
+                        />
+                    </FormControl>
+                </div>
                 {
                     task.id !== '' ? (
                         <div style={{ padding: "10px 0" }}>
                             <div style={{ padding: "10px 0" }}>任务id：{task.id}</div>
-                            <div style={{ padding: "10px 0" }}>输出文件名：{task.original.result_name}</div>
+                            {/* <div style={{ padding: "10px 0" }}>输出文件名：{task.original.result_name}</div>
                             <div style={{ padding: "10px 0" }}>
                                 <div>检查文件列表</div>
                                 {
@@ -250,11 +245,11 @@ function TaskForm(props) {
                                         <div>{value}</div>
                                     ))
                                 }
-                            </div>
+                            </div> */}
                             <div style={{ padding: "10px 0" }}>运行状态：{task.task_info.task_status}</div>
-                            <div style={{ padding: "10px 0" }}>创建时间：{task.create_time}</div>
-                            <div style={{ padding: "10px 0" }}>最后一次运行时间：{task.task_info.last_run_time}</div>
-                            <div style={{ padding: "10px 0" }}>下一次运行时间：{task.task_info.next_run_time}</div>
+                            <div style={{ padding: "10px 0" }}>创建时间：{task.create_time > 0 ? (new Date(task.create_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
+                            <div style={{ padding: "10px 0" }}>最后一次运行时间：{task.task_info.last_run_time > 0 ? (new Date(task.task_info.last_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
+                            <div style={{ padding: "10px 0" }}>下一次运行时间：{task.task_info.next_run_time > 0 ? (new Date(task.task_info.next_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
                         </div>
                     ) : ''
                 }
@@ -262,11 +257,7 @@ function TaskForm(props) {
                     display: 'flex',
                     justifyContent: 'space-around'
                 }}>
-                    {
-                        task.id === '' ? (
-                            <Button variant="text" onClick={handleSaveClick}>保存</Button>
-                        ) : ''
-                    }
+                    <Button variant="text" onClick={handleSaveClick}>修改</Button>
                     {
                         task.id !== '' ? (
                             <Button variant="text" color="error" onClick={handleDeleteClick}>删除</Button>
@@ -279,11 +270,15 @@ function TaskForm(props) {
 }
 
 function Row(props) {
-    const { row, clickTask } = props;
+    const { row, clickTask, doTaskRightNow } = props;
     const [open, setOpen] = React.useState(false);
 
     const downloadFile = (uri) => {
         window.open(uri)
+    }
+
+    const handleTaskRightNow = (id) => {
+        doTaskRightNow(id)
     }
 
     return (
@@ -297,6 +292,12 @@ function Row(props) {
                     >
                         {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                     </IconButton>
+                    {
+                        row.task_info.next_run_time > 0 && row.task_info.next_run_time - new Date().getTime() / 1000 >= 180
+                        && row.task_info.last_run_time > 0 && new Date().getTime() / 1000 - row.task_info.last_run_time  >= 180 ? (
+                            <Button onClick={() => handleTaskRightNow(row.id)}>立即执行</Button>
+                        ) : ''
+                    }
                 </TableCell>
                 <TableCell component="th" scope="row" onClick={() => clickTask()}>
                     {row.id}
@@ -309,9 +310,9 @@ function Row(props) {
                     </Tooltip>
                 </TableCell>
                 <TableCell align="right">
-                    <div>创建时间：{row.create_time} </div>
-                    <div>最后一次运行时间：{row.task_info.last_run_time} </div>
-                    <div>下一次运行时间：{row.task_info.next_run_time} </div>
+                    <div>创建时间：{row.create_time > 0 ? (new Date(row.create_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''} </div>
+                    <div>最后一次运行时间：{row.task_info.last_run_time > 0 ? (new Date(row.task_info.last_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''} </div>
+                    <div>下一次运行时间：{row.task_info.next_run_time > 0 ? (new Date(row.task_info.next_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''} </div>
                     <div>运行类型：{row.task_info.run_type} </div>
                 </TableCell>
             </TableRow>
@@ -361,25 +362,34 @@ export default function TaskList(props) {
     };
 
     const handleSave = (value) => {
-        task_add(value)
+        if (value.id === '') {
+            task_add(value)
+        } else {
+            update_task(value)
+        }
     }
 
     const update_task = (value) => {
-        axios.post("/tasks/add", {
+        axios.post("/tasks/update?task_id=" + value.id, {
             "urls": value.original.urls,
-            "result_name": value.original.result_name,
-            "md5": ""
+            "result_name": output_folder + value.original.result_name + output_extenion,
+            "md5": "",
+            "run_type": value.original.run_type,
         }).then(res => {
-            console.log(res)
+            if (res.data.code === "200") {
+                get_task_list()
+            } else {
+                throw new Error(res.data.msg)
+            }
         }).catch(e => {
-            console.log(e)
+            handleOpenAlertBar(e.message)
         })
     }
 
     const task_add = (value) => {
         axios.post("/tasks/add", {
             "urls": value.original.urls,
-            "result_name": output_folder + value.original.result_name + ".m3u",
+            "result_name": output_folder + value.original.result_name + output_extenion,
             "md5": "",
             "run_type": value.original.run_type,
         }).then(res => {
@@ -424,9 +434,17 @@ export default function TaskList(props) {
         setOpenAlertBar(false)
     }
 
+    const doTaskRightNow = (id) => {
+        axios.get("/tasks/run?task_id=" + id).then(res => {
+            get_task_list()
+        }).catch(e => {
+            handleOpenAlertBar("操作失败")
+        })
+    }
+
     return (
         <div>
-            <Button variant="contained" onClick={() => handleClickOpen(null)}>新增</Button>
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleClickOpen(null)}>新增</Button>
             <Snackbar
                 open={openAlertBar}
                 autoHideDuration={6000}
@@ -451,9 +469,11 @@ export default function TaskList(props) {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {taskList.map((row) => (
-                            <Row key={row.id} row={row} clickTask={() => handleClickOpen(row)} />
-                        ))}
+                        {
+                            taskList.map((row) => (
+                                <Row key={row.id} row={row} doTaskRightNow={doTaskRightNow} clickTask={() => handleClickOpen(row)} />
+                            ))
+                        }
                     </TableBody>
                 </Table>
             </TableContainer>

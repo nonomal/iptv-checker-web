@@ -27,16 +27,14 @@ import utils from './../../utils/common'
 import TaskListView from './task';
 import GitHubIcon from '@mui/icons-material/GitHub';
 
-const ModIHaveM3uLink = 0
-const ModIHaveM3uContent = 1
-const ModPublicSource = 2
-const ModUploadFromLocal = 3
-const TaskList = 4
-const SystemInfo = 5
+const ModSmartInput = 0
+const ModPublicSource = 1
+const ModUploadFromLocal = 2
+const TaskList = 3
+const SystemInfo = 4
 
 let selectOptionWithNoWatch = [
-  { 'mod': ModIHaveM3uLink, "name": "订阅源链接" },
-  { 'mod': ModIHaveM3uContent, "name": "订阅源内容" },
+  { 'mod': ModSmartInput, "name": "智能识别框" },
   { 'mod': ModPublicSource, "name": "公共订阅源" },
   { 'mod': ModUploadFromLocal, "name": "本地上传" },
   { 'mod': TaskList, "name": "定时任务" },
@@ -96,17 +94,15 @@ export default function HorizontalLinearStepper() {
   const navigate = useNavigate();
   const _mainContext = React.useContext(MainContext);
   const [commonLinks, setCommonLink] = React.useState([]);
-  const [mod, setMod] = React.useState(ModIHaveM3uLink);
+  const [mod, setMod] = React.useState(ModSmartInput);
   const [body, setBody] = React.useState('');
   const [selectedUrl, setSelectedUrl] = React.useState([]);
-  const [customUrl, setCustomUrl] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const [errorMsg, setErrorMsg] = React.useState('')
   const [showError, setShowError] = React.useState(false)
   const [watchList, setWatchList] = React.useState([])
   const [localFileName, setLocalFileName] = React.useState('')
   const [systemInfo, setSystemInfo] = React.useState(null)
-  const [taskList, setTaskList] = React.useState([])
 
   useEffect(() => {
     system_info()
@@ -119,11 +115,7 @@ export default function HorizontalLinearStepper() {
       setMod(_tabInt)
       let userInput = localStorage.getItem(lastHomeUserInput)
       if (userInput !== '' && userInput !== null) {
-        if (_tabInt === ModIHaveM3uLink) {
-          setCustomUrl(userInput)
-        } else {
-          setBody(userInput)
-        }
+        setBody(userInput)
       }
     }
   }, [])
@@ -159,10 +151,6 @@ export default function HorizontalLinearStepper() {
     setSelectedUrl(e.target.value)
   }
 
-  const handleChangeTextSelectedUrl = (e) => {
-    setCustomUrl(e.target.value)
-  }
-
   const system_info = () => {
     axios.get("/system/info").then(res => {
       setSystemInfo(res.data)
@@ -172,43 +160,57 @@ export default function HorizontalLinearStepper() {
     });
   }
 
+  const parseOnlineData = async (selectedUrl) => {
+    let targetUrl = [];
+    for (let i = 0; i < selectedUrl.length; i++) {
+      for (let j = 0; j < selectedUrl[i].length; j++) {
+        targetUrl.push(selectedUrl[i][j])
+      }
+    }
+    console.log(targetUrl)
+    let bodies = []
+    if (targetUrl.length == 0) {
+      return bodies
+    }
+    for (let i = 0; i < targetUrl.length; i++) {
+      if (utils.isValidUrl(targetUrl[i])) {
+        let res = await axios.get(_mainContext.getM3uBody(targetUrl[i]))
+        if (res.status === 200) {
+          bodies.push(res.data)
+        }
+      }
+    }
+    return bodies
+  }
+
   const handleConfirm = async (e) => {
     setLoading(true);
     try {
-      if (mod === ModPublicSource || mod === ModIHaveM3uLink) {
-        let targetUrl = [];
-        if (mod === ModPublicSource) {
-          localStorage.removeItem(lastHomeUserInput)
-          for (let i = 0; i < selectedUrl.length; i++) {
-            for (let j = 0; j < selectedUrl[i].length; j++) {
-              targetUrl.push(selectedUrl[i][j])
-            }
-          }
-        } else {
-          if (customUrl !== '') {
-            localStorage.setItem(lastHomeUserInput, customUrl)
-            targetUrl = customUrl.split(",")
-          }
-        }
-        if (targetUrl.length == 0) {
+      if (mod === ModPublicSource) {
+        localStorage.removeItem(lastHomeUserInput)
+        let bodies = await parseOnlineData(selectedUrl);
+        if (bodies.length === 0) {
           throw new Error('链接为空')
         }
-        let bodies = []
-        for (let i = 0; i < targetUrl.length; i++) {
-          if (utils.isValidUrl(targetUrl[i])) {
-            let res = await axios.get(_mainContext.getM3uBody(targetUrl[i]))
-            if (res.status === 200) {
-              bodies.push(res.data)
-            }
-          }
-        }
         _mainContext.changeOriginalM3uBodies(bodies)
-      } else if (mod === ModIHaveM3uContent) {
+      } else if (mod === ModSmartInput) {
         if (body !== '') {
           localStorage.setItem(lastHomeUserInput, body)
-          _mainContext.changeOriginalM3uBody(body)
+          // 尝试解析url
+          let targetUrlArr = body.split(",")
+          let bodies = []
+          if (targetUrlArr.length > 0) {
+            bodies = await parseOnlineData([targetUrlArr]);
+          }
+          if (bodies.length > 0) {
+            _mainContext.changeOriginalM3uBody(bodies)
+          }
+          // 再尝试解析body
+          if (bodies.length === 0) {
+            _mainContext.changeOriginalM3uBody(body)
+          }
         } else {
-          throw new Error('获取数据失败')
+          throw new Error('数据为空')
         }
       } else if (mod == ModUploadFromLocal) {
         if (body !== '') {
@@ -272,7 +274,7 @@ export default function HorizontalLinearStepper() {
       </Snackbar>
       <img src={LogoSvg} height="70" style={{ backgroundColor: "#fff", borderRadius: '20px' }} />
       <h1 style={{ fontSize: '30px' }}>IPTV Checker</h1>
-      <Tooltip title="❤️❤️❤️帮忙点个star，万分感谢！！！❤️❤️❤️">
+      <Tooltip title="❤️❤️❤️帮忙点个star，万分感谢！！！❤️❤️❤️" placement="top">
         <Button onClick={() => openLink(githubLink)} startIcon={<GitHubIcon />}>
           {copyright}
         </Button>
@@ -287,14 +289,9 @@ export default function HorizontalLinearStepper() {
             }
           </Tabs>
         </Box>
-        <TabPanel mod={mod} index={ModIHaveM3uLink}>
+        <TabPanel mod={mod} index={ModSmartInput}>
           <FormControl sx={{ width: boxMaxWith }} variant="standard">
-            <TextField multiline id="standard-multiline-static" placeholder='多个链接请用英文逗号","分隔,支持标准m3u链接以及文件内容为多行的[名称,url]的链接地址格式' rows={4} value={customUrl} onChange={handleChangeTextSelectedUrl} />
-          </FormControl>
-        </TabPanel>
-        <TabPanel mod={mod} index={ModIHaveM3uContent}>
-          <FormControl sx={{ width: boxMaxWith }} variant="standard">
-            <TextField multiline id="standard-multiline-static" rows={4} value={body} onChange={handleChangeContent} placeholder='支持标准m3u文件格式以及文件内容为多行的[名称,url]的内容格式' />
+            <TextField multiline id="standard-multiline-static" rows={4} value={body} onChange={handleChangeContent} placeholder='多个链接请用英文逗号","分隔,支持标准m3u链接以及文件内容为多行的[名称,url]的链接地址格式、支持标准m3u文件格式以及文件内容为多行的[名称,url]的内容格式' />
           </FormControl>
         </TabPanel>
         <TabPanel mod={mod} index={ModPublicSource}>

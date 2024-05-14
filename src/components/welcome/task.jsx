@@ -27,6 +27,9 @@ import Snackbar from '@mui/material/Snackbar';
 import PublicIcon from '@mui/icons-material/Public';
 import UploadIcon from '@mui/icons-material/Upload';
 import AddIcon from '@mui/icons-material/Add';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const run_type_list = [{ "value": "EveryDay", "name": "每天" }, { "value": "EveryHour", "name": "每小时" }]
 const output_folder = "static/output/"
@@ -38,6 +41,8 @@ const defaultValue = {
         "result_name": "",
         "md5": "",
         "run_type": "EveryDay",
+        "keyword_dislike": [],
+        "keyword_like": [],
     },
     "id": "",
     "create_time": 0,
@@ -53,6 +58,7 @@ const defaultValue = {
 function TaskForm(props) {
     const { onClose, formValue, open, onSave, handleSave, handleDelete } = props;
     const [task, setTask] = React.useState(defaultValue);
+    const [filterKeyword, setFilterKeyword] = React.useState('')
 
     const handleClose = () => {
         onClose();
@@ -166,10 +172,69 @@ function TaskForm(props) {
         });
     }
 
+    const uniqueArr = (array) => {
+        return array.filter((item, index) => array.indexOf(item) === index)
+    }
+
+    const addKeyword = (type) => {
+        if (filterKeyword === '') {
+            return 
+        }
+        if (type === 1) {
+            let kw = task.original.keyword_like ?? [];
+            kw.push(filterKeyword)
+            setTask({
+                ...task,
+                original: {
+                    ...task.original,
+                    keyword_like: uniqueArr(kw)
+                }
+            });
+        } else if (type === 2) {
+            let kw = task.original.keyword_dislike ?? [];
+            kw.push(filterKeyword)
+            setTask({
+                ...task,
+                original: {
+                    ...task.original,
+                    keyword_dislike: uniqueArr(kw)
+                }
+            });
+        }
+        setFilterKeyword("")
+    }
+
+    const changeFilterKeyword = (e) => {
+        setFilterKeyword(e.target.value)
+    }
+
+    const deleteThisDislikeKw = (i) => {
+        let kw = task.original.keyword_dislike;
+        kw.splice(i, 1)
+        setTask({
+            ...task,
+            original: {
+                ...task.original,
+                keyword_dislike: kw
+            }
+        });
+    }
+
+    const deleteThisLikeKw = (i) => {
+        let kw = task.original.keyword_like;
+        kw.splice(i, 1)
+        setTask({
+            ...task,
+            original: {
+                ...task.original,
+                keyword_like: kw
+            }
+        });
+    }
+
     return (
         <Dialog onClose={handleClose} open={open}>
             <div style={{ padding: '40px', width: '500px' }}>
-
                 <div>
                     <FormControl fullWidth style={{
                         padding: "0 0 20px",
@@ -198,6 +263,57 @@ function TaskForm(props) {
                             本地上传m3u文件
                             <input hidden accept="*" multiple type="file" onChange={handleFileUpload} />
                         </Button>
+                    </FormControl>
+                    <FormControl fullWidth style={{
+                        padding: "0 0 20px",
+                    }}>
+                        只看频道关键词
+                    </FormControl>
+                    <FormControl fullWidth style={{
+                        padding: "0 0 20px",
+                    }}>
+                        <Stack direction="row" spacing={1}>
+                            {
+                                task.original.keyword_like !== null && task.original.keyword_like.map((value, i) => (
+                                    <Chip
+                                        label={value}
+                                        onDelete={() => deleteThisLikeKw(i)}
+                                        variant="outlined"
+                                        key={i}
+                                    />
+                                ))
+                            }
+                        </Stack>
+                    </FormControl>
+                    <FormControl fullWidth style={{
+                        padding: "0 0 20px",
+                    }}>
+                        不看频道关键词
+                    </FormControl>
+                    <FormControl fullWidth style={{
+                        padding: "0 0 20px",
+                    }}>
+                        <Stack direction="row" spacing={1}>
+                            {
+                                task.original.keyword_dislike !== null && task.original.keyword_dislike.map((value, i) => (
+                                    <Chip
+                                        label={value}
+                                        variant="outlined"
+                                        onDelete={() => deleteThisDislikeKw(i)}
+                                        key={i}
+                                    />
+                                ))
+                            }
+                        </Stack>
+                    </FormControl>
+                    <FormControl fullWidth style={{
+                        margin: "0 0 20px",
+                    }}>
+                        <Stack direction="row" spacing={1}>
+                            <TextField id="standard-basic" label="添加关键词" variant="standard" value={filterKeyword} onChange={changeFilterKeyword} />
+                            <Button size='small' variant="outlined" onClick={() => addKeyword(1)}>添加只看</Button>
+                            <Button size='small' variant="outlined" onClick={() => addKeyword(2)}>添加不看</Button>
+                        </Stack>
                     </FormControl>
                     <FormControl fullWidth style={{
                         margin: "0 0 20px",
@@ -237,15 +353,6 @@ function TaskForm(props) {
                     task.id !== '' ? (
                         <div style={{ padding: "10px 0" }}>
                             <div style={{ padding: "10px 0" }}>任务id：{task.id}</div>
-                            {/* <div style={{ padding: "10px 0" }}>输出文件名：{task.original.result_name}</div>
-                            <div style={{ padding: "10px 0" }}>
-                                <div>检查文件列表</div>
-                                {
-                                    task.original.urls.map(value => (
-                                        <div>{value}</div>
-                                    ))
-                                }
-                            </div> */}
                             <div style={{ padding: "10px 0" }}>运行状态：{task.task_info.task_status}</div>
                             <div style={{ padding: "10px 0" }}>创建时间：{task.create_time > 0 ? (new Date(task.create_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
                             <div style={{ padding: "10px 0" }}>最后一次运行时间：{task.task_info.last_run_time > 0 ? (new Date(task.task_info.last_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
@@ -294,7 +401,7 @@ function Row(props) {
                     </IconButton>
                     {
                         row.task_info.next_run_time > 0 && row.task_info.next_run_time - new Date().getTime() / 1000 >= 180
-                        && row.task_info.last_run_time > 0 && new Date().getTime() / 1000 - row.task_info.last_run_time  >= 180 ? (
+                            && row.task_info.last_run_time > 0 && new Date().getTime() / 1000 - row.task_info.last_run_time >= 180 ? (
                             <Button onClick={() => handleTaskRightNow(row.id)}>立即执行</Button>
                         ) : ''
                     }
@@ -328,6 +435,24 @@ function Row(props) {
                                         </TableCell>
                                     </TableRow>
                                 ))}
+                                {
+                                    row.original.keyword_dislike !== null ? (
+                                        <TableRow key="dislike-row">
+                                            <TableCell component="th" scope="row">
+                                                不喜欢关键词：{row.original.keyword_dislike.join("、")}
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : ''
+                                }
+                                {
+                                    row.original.keyword_like !== null ? (
+                                        <TableRow key="like-row">
+                                            <TableCell component="th" scope="row">
+                                                喜欢关键词：{row.original.keyword_like.join("、")}
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : ''
+                                }
                             </Table>
                         </Box>
                     </Collapse>

@@ -29,7 +29,9 @@ import UploadIcon from '@mui/icons-material/Upload';
 import AddIcon from '@mui/icons-material/Add';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
-import DeleteIcon from '@mui/icons-material/Delete';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Typography from '@mui/material/Typography';
 
 const run_type_list = [{ "value": "EveryDay", "name": "每天" }, { "value": "EveryHour", "name": "每小时" }]
 const output_folder = "static/output/"
@@ -43,6 +45,8 @@ const defaultValue = {
         "run_type": "EveryDay",
         "keyword_dislike": [],
         "keyword_like": [],
+        "http_timeout": 0,
+        "check_timeout": 0
     },
     "id": "",
     "create_time": 0,
@@ -55,10 +59,37 @@ const defaultValue = {
     }
 }
 
+function CustomTabPanel(props) {
+    const { children, value, index, ...other } = props;
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
+        >
+            {value === index && (
+
+                <Typography>{children}</Typography>
+
+            )}
+        </div>
+    );
+}
+
+
 function TaskForm(props) {
     const { onClose, formValue, open, onSave, handleSave, handleDelete } = props;
     const [task, setTask] = React.useState(defaultValue);
     const [filterKeyword, setFilterKeyword] = React.useState('')
+
+    const [tabIndex, setTabIndex] = React.useState(0)
+
+    const handleTabChange = (event, newValue) => {
+        setTabIndex(newValue);
+    };
 
     const handleClose = () => {
         onClose();
@@ -88,6 +119,8 @@ function TaskForm(props) {
     useEffect(() => {
         if (formValue !== null) {
             formValue.original.result_name = formValue.original.result_name.replace(output_folder, "").replace(output_extenion, "")
+            formValue.original.http_timeout = formValue.original.http_timeout ?? 0;
+            formValue.original.check_timeout = formValue.original.check_timeout ?? 0;
             setTask(formValue)
         } else {
             let default_data = JSON.parse(JSON.stringify(defaultValue))
@@ -178,7 +211,7 @@ function TaskForm(props) {
 
     const addKeyword = (type) => {
         if (filterKeyword === '') {
-            return 
+            return
         }
         if (type === 1) {
             let kw = task.original.keyword_like ?? [];
@@ -235,35 +268,101 @@ function TaskForm(props) {
     return (
         <Dialog onClose={handleClose} open={open}>
             <div style={{ padding: '40px', width: '500px' }}>
-                <div>
-                    <FormControl fullWidth style={{
-                        padding: "0 0 20px",
-                    }}>
-                        检查文件列表
-                    </FormControl>
-                    <FormControl fullWidth style={{
-                        padding: "0 0 20px",
-                    }}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                    <Tabs value={tabIndex} onChange={handleTabChange} aria-label="basic tabs example">
+                        <Tab label="基础配置" />
+                        <Tab label="个性化配置" />
+                        <Tab label="系统配置" />
+                    </Tabs>
+                </Box>
+                <CustomTabPanel value={tabIndex} index={0}>
+                    <div>
+                        <FormControl fullWidth style={{
+                            padding: "0 0 20px",
+                        }}>
+                            检查文件列表
+                        </FormControl>
+                        <FormControl fullWidth style={{
+                            padding: "0 0 20px",
+                        }}>
+                            {
+                                task.original.urls.map((value, index) => (
+                                    <div style={{ display: 'flex' }} key={index}>
+                                        <TextField style={{ width: '100%' }} disabled={value.startsWith("static")} id="standard-basic" variant="standard" name={"url-" + index} value={value} onChange={changeUrls} />
+                                        <Button variant="text" onClick={() => handleDelRow(index)}>删除</Button>
+                                    </div>
+                                ))
+                            }
+                        </FormControl>
+                        <FormControl fullWidth style={{
+                            padding: "0 0 20px", display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'space-between'
+                        }}>
+                            <Button variant="outlined" onClick={() => addNewM3uLink()} startIcon={<PublicIcon />}>添加在线链接</Button>
+                            <Button variant="contained" component="label" startIcon={<UploadIcon />}>
+                                本地上传m3u文件
+                                <input hidden accept="*" multiple type="file" onChange={handleFileUpload} />
+                            </Button>
+                        </FormControl>
+                        <FormControl fullWidth style={{
+                            margin: "0 0 20px",
+                        }}>
+                            <InputLabel id="demo-simple-select-standard-label">定时检查时间</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-standard-label"
+                                id="demo-simple-select-standard"
+                                value={task.original.run_type}
+                                label="定时检查时间"
+                                onChange={handleChangeRunType}
+                            >
+                                {
+                                    run_type_list.map((value, index) => (
+                                        <MenuItem value={value.value} key={index}>{value.name}</MenuItem>
+                                    ))
+                                }
+                            </Select>
+                        </FormControl>
+                        <FormControl fullWidth style={{
+                            margin: "20px 0 20px",
+                        }}>
+                            <InputLabel htmlFor="outlined-adornment-amount">结果文件名</InputLabel>
+                            <OutlinedInput
+                                style={{ width: '100%' }}
+                                name="resultName"
+                                endAdornment={<InputAdornment position="end">{output_extenion}</InputAdornment>}
+                                startAdornment={<InputAdornment position="start">{output_folder}</InputAdornment>}
+                                aria-describedby="outlined-weight-helper-text"
+                                label="输出文件名"
+                                value={task.original.result_name}
+                                onChange={changeResultName}
+                            />
+                        </FormControl>
                         {
-                            task.original.urls.map((value, index) => (
-                                <div style={{ display: 'flex' }} key={index}>
-                                    <TextField style={{ width: '100%' }} disabled={value.startsWith("static")} id="standard-basic" variant="standard" name={"url-" + index} value={value} onChange={changeUrls} />
-                                    <Button variant="text" onClick={() => handleDelRow(index)}>删除</Button>
+                            task.id !== '' ? (
+                                <div style={{ padding: "10px 0" }}>
+                                    <div style={{ padding: "10px 0" }}>任务id：{task.id}</div>
+                                    <div style={{ padding: "10px 0" }}>运行状态：{task.task_info.task_status}</div>
+                                    <div style={{ padding: "10px 0" }}>创建时间：{task.create_time > 0 ? (new Date(task.create_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
+                                    <div style={{ padding: "10px 0" }}>最后一次运行时间：{task.task_info.last_run_time > 0 ? (new Date(task.task_info.last_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
+                                    <div style={{ padding: "10px 0" }}>下一次运行时间：{task.task_info.next_run_time > 0 ? (new Date(task.task_info.next_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
                                 </div>
-                            ))
+                            ) : ''
                         }
-                    </FormControl>
-                    <FormControl fullWidth style={{
-                        padding: "0 0 20px", display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between'
-                    }}>
-                        <Button variant="outlined" onClick={() => addNewM3uLink()} startIcon={<PublicIcon />}>添加在线链接</Button>
-                        <Button variant="contained" component="label" startIcon={<UploadIcon />}>
-                            本地上传m3u文件
-                            <input hidden accept="*" multiple type="file" onChange={handleFileUpload} />
-                        </Button>
-                    </FormControl>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-around'
+                        }}>
+                            <Button variant="text" onClick={handleSaveClick}>修改</Button>
+                            {
+                                task.id !== '' ? (
+                                    <Button variant="text" color="error" onClick={handleDeleteClick}>删除</Button>
+                                ) : ''
+                            }
+                        </div>
+                    </div>
+                </CustomTabPanel>
+                <CustomTabPanel value={tabIndex} index={1}>
                     <FormControl fullWidth style={{
                         padding: "0 0 20px",
                     }}>
@@ -315,62 +414,17 @@ function TaskForm(props) {
                             <Button size='small' variant="outlined" onClick={() => addKeyword(2)}>添加不看</Button>
                         </Stack>
                     </FormControl>
+                </CustomTabPanel>
+                <CustomTabPanel value={tabIndex} index={2}>
                     <FormControl fullWidth style={{
                         margin: "0 0 20px",
                     }}>
-                        <InputLabel id="demo-simple-select-standard-label">定时检查时间</InputLabel>
-                        <Select
-                            labelId="demo-simple-select-standard-label"
-                            id="demo-simple-select-standard"
-                            value={task.original.run_type}
-                            label="定时检查时间"
-                            onChange={handleChangeRunType}
-                        >
-                            {
-                                run_type_list.map((value, index) => (
-                                    <MenuItem value={value.value} key={index}>{value.name}</MenuItem>
-                                ))
-                            }
-                        </Select>
+                        <Stack direction="row" spacing={1}>
+                            <TextField id="standard-basic" label="http超时" variant="standard" value={task.original.http_timeout} onChange={changeFilterKeyword} />
+                            <TextField id="standard-basic" label="检查超时" variant="standard" value={task.original.check_timeout} onChange={changeFilterKeyword} />
+                        </Stack>
                     </FormControl>
-                    <FormControl fullWidth style={{
-                        margin: "20px 0 20px",
-                    }}>
-                        <InputLabel htmlFor="outlined-adornment-amount">结果文件名</InputLabel>
-                        <OutlinedInput
-                            style={{ width: '100%' }}
-                            name="resultName"
-                            endAdornment={<InputAdornment position="end">{output_extenion}</InputAdornment>}
-                            startAdornment={<InputAdornment position="start">{output_folder}</InputAdornment>}
-                            aria-describedby="outlined-weight-helper-text"
-                            label="输出文件名"
-                            value={task.original.result_name}
-                            onChange={changeResultName}
-                        />
-                    </FormControl>
-                </div>
-                {
-                    task.id !== '' ? (
-                        <div style={{ padding: "10px 0" }}>
-                            <div style={{ padding: "10px 0" }}>任务id：{task.id}</div>
-                            <div style={{ padding: "10px 0" }}>运行状态：{task.task_info.task_status}</div>
-                            <div style={{ padding: "10px 0" }}>创建时间：{task.create_time > 0 ? (new Date(task.create_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
-                            <div style={{ padding: "10px 0" }}>最后一次运行时间：{task.task_info.last_run_time > 0 ? (new Date(task.task_info.last_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
-                            <div style={{ padding: "10px 0" }}>下一次运行时间：{task.task_info.next_run_time > 0 ? (new Date(task.task_info.next_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
-                        </div>
-                    ) : ''
-                }
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-around'
-                }}>
-                    <Button variant="text" onClick={handleSaveClick}>修改</Button>
-                    {
-                        task.id !== '' ? (
-                            <Button variant="text" color="error" onClick={handleDeleteClick}>删除</Button>
-                        ) : ''
-                    }
-                </div>
+                </CustomTabPanel>
             </div>
         </Dialog>
     );

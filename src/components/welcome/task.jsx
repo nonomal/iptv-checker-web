@@ -32,6 +32,11 @@ import Stack from '@mui/material/Stack';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SaveIcon from '@mui/icons-material/Save';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
+import MoodBadIcon from '@mui/icons-material/MoodBad';
 
 const run_type_list = [{ "value": "EveryDay", "name": "每天" }, { "value": "EveryHour", "name": "每小时" }]
 const output_folder = "static/output/"
@@ -68,12 +73,11 @@ function CustomTabPanel(props) {
             hidden={value !== index}
             id={`simple-tabpanel-${index}`}
             aria-labelledby={`simple-tab-${index}`}
+            style={{height:'400px'}}
             {...other}
         >
             {value === index && (
-
                 <Typography>{children}</Typography>
-
             )}
         </div>
     );
@@ -265,6 +269,26 @@ function TaskForm(props) {
         });
     }
 
+    const changeCheckTimeout = (e) => {
+        setTask({
+            ...task,
+            original: {
+                ...task.original,
+                check_timeout: parseInt(e.target.value, 10)
+            }
+        });
+    }
+
+    const changeHttpTimeout = (e) => {
+        setTask({
+            ...task,
+            original: {
+                ...task.original,
+                http_timeout: parseInt(e.target.value, 10)
+            }
+        });
+    }
+
     return (
         <Dialog onClose={handleClose} open={open}>
             <div style={{ padding: '40px', width: '500px' }}>
@@ -273,29 +297,47 @@ function TaskForm(props) {
                         <Tab label="基础配置" />
                         <Tab label="个性化配置" />
                         <Tab label="系统配置" />
+                        {
+                            task.id !== '' ? (
+                                <Tab label="运行状态" />
+                            ) : ''
+                        }
                     </Tabs>
                 </Box>
+                {
+                    task.id !== '' ? (
+                        <CustomTabPanel value={tabIndex} index={3}>
+                            <div style={{ padding: "10px 0" }}>任务id：{task.id}</div>
+                            <div style={{ padding: "10px 0" }}>运行状态：{task.task_info.task_status}</div>
+                            <div style={{ padding: "10px 0" }}>创建时间：{task.create_time > 0 ? (new Date(task.create_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
+                            <div style={{ padding: "10px 0" }}>最后一次运行时间：{task.task_info.last_run_time > 0 ? (new Date(task.task_info.last_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
+                            <div style={{ padding: "10px 0" }}>下一次运行时间：{task.task_info.next_run_time > 0 ? (new Date(task.task_info.next_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
+                        </CustomTabPanel>
+                    ) : ''
+                }
                 <CustomTabPanel value={tabIndex} index={0}>
                     <div>
+                        {
+                            task.original.urls.length > 0 ? (
+                                <FormControl fullWidth style={{
+                                    padding: "0 0 20px",
+                                }}>
+                                    <p>检查文件列表</p>
+                                    {
+                                        task.original.urls.map((value, index) => (
+                                            <div style={{ display: 'flex' }} key={index}>
+                                                <TextField style={{ width: '100%' }} disabled={value.startsWith("static")} id="standard-basic" variant="standard" name={"url-" + index} value={value} onChange={changeUrls} />
+                                                <IconButton aria-label="delete" onClick={() => handleDelRow(index)}>
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </div>
+                                        ))
+                                    }
+                                </FormControl>
+                            ) : ''
+                        }
                         <FormControl fullWidth style={{
-                            padding: "0 0 20px",
-                        }}>
-                            检查文件列表
-                        </FormControl>
-                        <FormControl fullWidth style={{
-                            padding: "0 0 20px",
-                        }}>
-                            {
-                                task.original.urls.map((value, index) => (
-                                    <div style={{ display: 'flex' }} key={index}>
-                                        <TextField style={{ width: '100%' }} disabled={value.startsWith("static")} id="standard-basic" variant="standard" name={"url-" + index} value={value} onChange={changeUrls} />
-                                        <Button variant="text" onClick={() => handleDelRow(index)}>删除</Button>
-                                    </div>
-                                ))
-                            }
-                        </FormControl>
-                        <FormControl fullWidth style={{
-                            padding: "0 0 20px", display: 'flex',
+                            padding: "20px 0 20px", display: 'flex',
                             flexDirection: 'row',
                             justifyContent: 'space-between'
                         }}>
@@ -338,90 +380,106 @@ function TaskForm(props) {
                                 onChange={changeResultName}
                             />
                         </FormControl>
-                        {
-                            task.id !== '' ? (
-                                <div style={{ padding: "10px 0" }}>
-                                    <div style={{ padding: "10px 0" }}>任务id：{task.id}</div>
-                                    <div style={{ padding: "10px 0" }}>运行状态：{task.task_info.task_status}</div>
-                                    <div style={{ padding: "10px 0" }}>创建时间：{task.create_time > 0 ? (new Date(task.create_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
-                                    <div style={{ padding: "10px 0" }}>最后一次运行时间：{task.task_info.last_run_time > 0 ? (new Date(task.task_info.last_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
-                                    <div style={{ padding: "10px 0" }}>下一次运行时间：{task.task_info.next_run_time > 0 ? (new Date(task.task_info.next_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
-                                </div>
-                            ) : ''
-                        }
                         <div style={{
                             display: 'flex',
-                            justifyContent: 'space-around'
+                            justifyContent: 'space-around',
+                            flexDirection: 'row-reverse'
                         }}>
-                            <Button variant="text" onClick={handleSaveClick}>修改</Button>
+                            <Button
+                                variant="outlined"
+                                style={{ marginRight: '20px' }}
+                                onClick={handleSaveClick}
+                                startIcon={<SaveIcon />}
+                            >
+                                保存
+                            </Button>
                             {
                                 task.id !== '' ? (
-                                    <Button variant="text" color="error" onClick={handleDeleteClick}>删除</Button>
+                                    <Button
+                                        variant="outlined"
+                                        style={{}}
+                                        color="error"
+                                        onClick={handleDeleteClick}
+                                        startIcon={<DeleteIcon />}
+                                    >删除</Button>
                                 ) : ''
                             }
                         </div>
                     </div>
                 </CustomTabPanel>
                 <CustomTabPanel value={tabIndex} index={1}>
+                    {
+                        task.original.keyword_like !== null && task.original.keyword_like.length > 0 ? (
+                            <FormControl fullWidth style={{
+                                padding: "0 0 20px",
+                            }}>
+                                <p>只看频道关键词</p>
+                                <Stack direction="row" spacing={1}>
+                                    {
+                                        task.original.keyword_like !== null && task.original.keyword_like.map((value, i) => (
+                                            <Chip
+                                                label={value}
+                                                onDelete={() => deleteThisLikeKw(i)}
+                                                variant="outlined"
+                                                key={i}
+                                            />
+                                        ))
+                                    }
+                                </Stack>
+                            </FormControl>
+                        ) : ''
+                    }
+                    {
+                        task.original.keyword_dislike !== null && task.original.keyword_dislike.length > 0 ? (
+                            <FormControl fullWidth style={{
+                                padding: "0 0 20px",
+                            }}>
+                                <p>不看频道关键词</p>
+                                <Stack direction="row" spacing={1}>
+                                    {
+                                        task.original.keyword_dislike.map((value, i) => (
+                                            <Chip
+                                                label={value}
+                                                variant="outlined"
+                                                onDelete={() => deleteThisDislikeKw(i)}
+                                                key={i}
+                                            />
+                                        ))
+                                    }
+                                </Stack>
+                            </FormControl>
+                        ) : ''
+                    }
                     <FormControl fullWidth style={{
-                        padding: "0 0 20px",
-                    }}>
-                        只看频道关键词
-                    </FormControl>
-                    <FormControl fullWidth style={{
-                        padding: "0 0 20px",
+                        margin: "20px 0 20px",
                     }}>
                         <Stack direction="row" spacing={1}>
-                            {
-                                task.original.keyword_like !== null && task.original.keyword_like.map((value, i) => (
-                                    <Chip
-                                        label={value}
-                                        onDelete={() => deleteThisLikeKw(i)}
-                                        variant="outlined"
-                                        key={i}
-                                    />
-                                ))
-                            }
-                        </Stack>
-                    </FormControl>
-                    <FormControl fullWidth style={{
-                        padding: "0 0 20px",
-                    }}>
-                        不看频道关键词
-                    </FormControl>
-                    <FormControl fullWidth style={{
-                        padding: "0 0 20px",
-                    }}>
-                        <Stack direction="row" spacing={1}>
-                            {
-                                task.original.keyword_dislike !== null && task.original.keyword_dislike.map((value, i) => (
-                                    <Chip
-                                        label={value}
-                                        variant="outlined"
-                                        onDelete={() => deleteThisDislikeKw(i)}
-                                        key={i}
-                                    />
-                                ))
-                            }
-                        </Stack>
-                    </FormControl>
-                    <FormControl fullWidth style={{
-                        margin: "0 0 20px",
-                    }}>
-                        <Stack direction="row" spacing={1}>
-                            <TextField id="standard-basic" label="添加关键词" variant="standard" value={filterKeyword} onChange={changeFilterKeyword} />
-                            <Button size='small' variant="outlined" onClick={() => addKeyword(1)}>添加只看</Button>
-                            <Button size='small' variant="outlined" onClick={() => addKeyword(2)}>添加不看</Button>
+                            <TextField 
+                            id="standard-basic" 
+                            label="添加关键词" 
+                            variant="standard" 
+                            value={filterKeyword} onChange={changeFilterKeyword} />
+                            <Button 
+                            size='small' 
+                            variant="outlined" 
+                            onClick={() => addKeyword(1)}
+                            startIcon={<InsertEmoticonIcon />}
+                            >添加只看</Button>
+                            <Button 
+                            size='small' 
+                            variant="outlined" 
+                            onClick={() => addKeyword(2)}
+                            startIcon={<MoodBadIcon />}>添加不看</Button>
                         </Stack>
                     </FormControl>
                 </CustomTabPanel>
                 <CustomTabPanel value={tabIndex} index={2}>
                     <FormControl fullWidth style={{
-                        margin: "0 0 20px",
+                        margin: "20px 0 20px",
                     }}>
                         <Stack direction="row" spacing={1}>
-                            <TextField id="standard-basic" label="http超时" variant="standard" value={task.original.http_timeout} onChange={changeFilterKeyword} />
-                            <TextField id="standard-basic" label="检查超时" variant="standard" value={task.original.check_timeout} onChange={changeFilterKeyword} />
+                            <TextField id="standard-basic" label="http超时(毫秒ms)" variant="standard" value={task.original.http_timeout} onChange={changeHttpTimeout} />
+                            <TextField id="standard-basic" label="检查超时(毫秒ms)" variant="standard" value={task.original.check_timeout} onChange={changeCheckTimeout} />
                         </Stack>
                     </FormControl>
                 </CustomTabPanel>
@@ -548,13 +606,21 @@ export default function TaskList(props) {
         }
     }
 
-    const update_task = (value) => {
-        axios.post("/tasks/update?task_id=" + value.id, {
+    const getTaskSaveData = (value) => {
+        return {
             "urls": value.original.urls,
             "result_name": output_folder + value.original.result_name + output_extenion,
             "md5": "",
             "run_type": value.original.run_type,
-        }).then(res => {
+            "keyword_dislike": value.original.keyword_dislike,
+            "keyword_like": value.original.keyword_like,
+            "http_timeout": value.original.http_timeout,
+            "check_timeout": value.original.check_timeout,
+        }
+    }
+
+    const update_task = (value) => {
+        axios.post("/tasks/update?task_id=" + value.id, getTaskSaveData(value)).then(res => {
             if (res.data.code === "200") {
                 get_task_list()
             } else {
@@ -566,12 +632,7 @@ export default function TaskList(props) {
     }
 
     const task_add = (value) => {
-        axios.post("/tasks/add", {
-            "urls": value.original.urls,
-            "result_name": output_folder + value.original.result_name + output_extenion,
-            "md5": "",
-            "run_type": value.original.run_type,
-        }).then(res => {
+        axios.post("/tasks/add",  getTaskSaveData(value)).then(res => {
             if (res.data.code === "200") {
                 get_task_list()
             } else {

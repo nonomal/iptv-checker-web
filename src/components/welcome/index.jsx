@@ -195,18 +195,17 @@ export default function HorizontalLinearStepper() {
         _mainContext.changeOriginalM3uBodies(bodies)
       } else if (mod === ModSmartInput) {
         if (body !== '') {
+          let bodyType = getBodyType(body)
           localStorage.setItem(lastHomeUserInput, body)
-          // 尝试解析url
-          let targetUrlArr = body.split(",")
-          let bodies = []
-          if (targetUrlArr.length > 0) {
-            bodies = await parseOnlineData([targetUrlArr]);
-          }
-          if (bodies.length > 0) {
-            _mainContext.changeOriginalM3uBody(bodies)
-          }
-          // 再尝试解析body
-          if (bodies.length === 0) {
+          if (bodyType === 2) {
+            // 尝试解析url
+            let targetUrlArr = body.split(",")
+            let bodies = []
+            if (targetUrlArr.length > 0) {
+              bodies = await parseOnlineData([targetUrlArr]);
+              _mainContext.changeOriginalM3uBody(bodies)
+            }
+          } else {
             _mainContext.changeOriginalM3uBody(body)
           }
         } else {
@@ -225,6 +224,24 @@ export default function HorizontalLinearStepper() {
       setErrorMsg(e.message)
     }
     setLoading(false)
+  }
+
+  const getBodyType = (body) => {
+    if (body.includes('#EXTM3U') || body.includes('#EXTINF')) {
+      return 1//  normal m3u8 body
+    } else {
+      let isM3uArr = false;
+      let expUrl = body.split(",");
+      if (expUrl.length > 0) {
+        if (utils.isValidUrl(expUrl[0])) {
+          isM3uArr = true
+        }
+      }
+      if (isM3uArr) {
+        return 2// m3u url array
+      }
+      return 3// text 
+    }
   }
 
   const handleCloseSnackBar = () => {

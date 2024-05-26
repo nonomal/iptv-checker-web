@@ -34,9 +34,12 @@ import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import MoodBadIcon from '@mui/icons-material/MoodBad';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormLabel from '@mui/material/FormLabel';
 
 const run_type_list = [{ "value": "EveryDay", "name": "每天" }, { "value": "EveryHour", "name": "每小时" }]
 const output_folder = "static/output/"
@@ -50,8 +53,10 @@ const defaultValue = {
         "run_type": "EveryDay",
         "keyword_dislike": [],
         "keyword_like": [],
-        "http_timeout": 0,
-        "check_timeout": 0
+        "http_timeout": 20000,
+        "check_timeout": 20000,
+        "concurrent": 30,
+        "sort": false,
     },
     "id": "",
     "create_time": 0,
@@ -73,7 +78,7 @@ function CustomTabPanel(props) {
             hidden={value !== index}
             id={`simple-tabpanel-${index}`}
             aria-labelledby={`simple-tab-${index}`}
-            style={{height:'400px'}}
+            style={{ height: '400px' }}
             {...other}
         >
             {value === index && (
@@ -125,6 +130,8 @@ function TaskForm(props) {
             formValue.original.result_name = formValue.original.result_name.replace(output_folder, "").replace(output_extenion, "")
             formValue.original.http_timeout = formValue.original.http_timeout ?? 0;
             formValue.original.check_timeout = formValue.original.check_timeout ?? 0;
+            formValue.original.concurrent = formValue.original.concurrent ?? 0;
+            formValue.original.sort = formValue.original.sort ?? false;
             setTask(formValue)
         } else {
             let default_data = JSON.parse(JSON.stringify(defaultValue))
@@ -279,12 +286,38 @@ function TaskForm(props) {
         });
     }
 
+    const changeConcurrent = (e) => {
+        setTask({
+            ...task,
+            original: {
+                ...task.original,
+                concurrent: parseInt(e.target.value, 10)
+            }
+        });
+    }
+
     const changeHttpTimeout = (e) => {
         setTask({
             ...task,
             original: {
                 ...task.original,
                 http_timeout: parseInt(e.target.value, 10)
+            }
+        });
+    }
+
+    const handleChangeSortValue = (e) => {
+        let checked = false
+        if (e.target.defaultValue === "false") {
+            checked = false
+        } else {
+            checked = true
+        }
+        setTask({
+            ...task,
+            original: {
+                ...task.original,
+                sort: checked
             }
         });
     }
@@ -322,7 +355,7 @@ function TaskForm(props) {
                                 <FormControl fullWidth style={{
                                     padding: "0 0 20px",
                                 }}>
-                                    <p>检查文件列表</p>
+                                    <p id="demo-simple-select-standard-label">检查文件列表</p>
                                     {
                                         task.original.urls.map((value, index) => (
                                             <div style={{ display: 'flex' }} key={index}>
@@ -413,7 +446,7 @@ function TaskForm(props) {
                             <FormControl fullWidth style={{
                                 padding: "0 0 20px",
                             }}>
-                                <p>只看频道关键词</p>
+                                <FormLabel id="demo-row-radio-buttons-group-label">只看频道关键词</FormLabel>
                                 <Stack direction="row" spacing={1}>
                                     {
                                         task.original.keyword_like !== null && task.original.keyword_like.map((value, i) => (
@@ -434,7 +467,7 @@ function TaskForm(props) {
                             <FormControl fullWidth style={{
                                 padding: "0 0 20px",
                             }}>
-                                <p>不看频道关键词</p>
+                                <FormLabel id="demo-row-radio-buttons-group-label">不看频道关键词</FormLabel>
                                 <Stack direction="row" spacing={1}>
                                     {
                                         task.original.keyword_dislike.map((value, i) => (
@@ -454,33 +487,56 @@ function TaskForm(props) {
                         margin: "20px 0 20px",
                     }}>
                         <Stack direction="row" spacing={1}>
-                            <TextField 
-                            id="standard-basic" 
-                            label="添加关键词" 
-                            variant="standard" 
-                            value={filterKeyword} onChange={changeFilterKeyword} />
-                            <Button 
-                            size='small' 
-                            variant="outlined" 
-                            onClick={() => addKeyword(1)}
-                            startIcon={<InsertEmoticonIcon />}
+                            <TextField
+                                id="standard-basic"
+                                label="添加关键词"
+                                variant="standard"
+                                value={filterKeyword} onChange={changeFilterKeyword} />
+                            <Button
+                                size='small'
+                                variant="outlined"
+                                onClick={() => addKeyword(1)}
+                                startIcon={<InsertEmoticonIcon />}
                             >添加只看</Button>
-                            <Button 
-                            size='small' 
-                            variant="outlined" 
-                            onClick={() => addKeyword(2)}
-                            startIcon={<MoodBadIcon />}>添加不看</Button>
+                            <Button
+                                size='small'
+                                variant="outlined"
+                                onClick={() => addKeyword(2)}
+                                startIcon={<MoodBadIcon />}>添加不看</Button>
                         </Stack>
+                    </FormControl>
+                    <FormControl>
+                        <FormLabel id="demo-row-radio-buttons-group-label">是否需要排序</FormLabel>
+                        <RadioGroup
+                            row
+                            aria-labelledby="demo-row-radio-buttons-group-label"
+                            name="row-radio-buttons-group"
+                            value={task.original.sort}
+                            onChange={handleChangeSortValue}
+                        >
+                            <FormControlLabel value="false" control={<Radio />} label="否" />
+                            <FormControlLabel value="true" control={<Radio />} label="是" />
+                        </RadioGroup>
                     </FormControl>
                 </CustomTabPanel>
                 <CustomTabPanel value={tabIndex} index={2}>
                     <FormControl fullWidth style={{
                         margin: "20px 0 20px",
                     }}>
-                        <Stack direction="row" spacing={1}>
-                            <TextField id="standard-basic" label="http超时(毫秒ms)" variant="standard" value={task.original.http_timeout} onChange={changeHttpTimeout} />
-                            <TextField id="standard-basic" label="检查超时(毫秒ms)" variant="standard" value={task.original.check_timeout} onChange={changeCheckTimeout} />
-                        </Stack>
+                        <FormLabel id="demo-row-radio-buttons-group-label">http超时(毫秒ms)</FormLabel>
+                        <TextField id="standard-basic" variant="standard" value={task.original.http_timeout} onChange={changeHttpTimeout} />
+                    </FormControl>
+                    <FormControl fullWidth style={{
+                        margin: "20px 0 20px",
+                    }}>
+                        <FormLabel id="demo-row-radio-buttons-group-label">检查超时(毫秒ms)</FormLabel>
+                        <TextField id="standard-basic" variant="standard" value={task.original.check_timeout} onChange={changeCheckTimeout} />
+                    </FormControl>
+                    <FormControl fullWidth style={{
+                        margin: "20px 0 20px",
+                    }}>
+                        <FormLabel id="demo-row-radio-buttons-group-label">检查并发数</FormLabel>
+                        <TextField id="standard-basic" variant="standard" value={task.original.concurrent} onChange={changeConcurrent} />
                     </FormControl>
                 </CustomTabPanel>
             </div>
@@ -489,15 +545,15 @@ function TaskForm(props) {
 }
 
 function Row(props) {
-    const { row, clickTask, doTaskRightNow } = props;
+    const { row, clickTask, doTaskRightNow, showDownloadDialog } = props;
     const [open, setOpen] = React.useState(false);
-
-    const downloadFile = (uri) => {
-        window.open(uri)
-    }
 
     const handleTaskRightNow = (id) => {
         doTaskRightNow(id)
+    }
+
+    const openDownloadDialog = (id) => {
+        showDownloadDialog(id)
     }
 
     return (
@@ -523,9 +579,9 @@ function Row(props) {
                 </TableCell>
                 <TableCell>
                     <Tooltip title={row.original.result_name}>
-                        <p onClick={() => downloadFile(row.original.result_name)}>
+                        <div onClick={() => openDownloadDialog(row.id)}>
                             {row.original.result_name}
-                        </p>
+                        </div>
                     </Tooltip>
                 </TableCell>
                 <TableCell align="right">
@@ -574,6 +630,82 @@ function Row(props) {
     );
 }
 
+function DownloadDialog(props) {
+    const { onClose, formValue, open } = props;
+
+    const [showData, setShowData] = React.useState([])
+    const [url, setUrl] = React.useState('')
+
+    const handleClose = () => {
+        onClose(false);
+    };
+
+    useEffect(() => {
+        setUrl(window.document.location.origin + "/" + formValue.url)
+        if (formValue.content !== '') {
+            setShowData(formValue.content.split("\n"))
+        } else {
+            console.log('---')
+            setShowData([])
+        }
+    }, [formValue])
+
+    const downloadFile = (url) => {
+        window.open(url)
+    }
+
+    return (
+        <Dialog onClose={handleClose} open={open}>
+            <div style={{
+                width: '960px',
+                minHeight: '400px'
+            }}>
+                <div style={{
+                    overflow: 'hidden',
+                    padding: '0 20px'
+                }}>
+                    <div style={{
+                        position: 'fixed',
+                        overflow: 'hidden',
+                        backgroundColor: '#fff',
+                        zIndex: 9,
+                        width: '560px',
+                    }}>
+                        <div>订阅链接：<b>{url}</b></div>
+                        {
+                            showData.length > 0 ? (
+                                <div>
+                                    <Button variant="text" onClick={() => downloadFile(formValue.url)}>点击下载</Button>
+                                </div>
+                            ) : ''
+                        }
+
+                    </div>
+                    {
+                        showData.length > 0 ? (
+                            <div style={{
+                                padding: "60px 0",
+                                position: 'relative',
+                                textWrap: "nowrap"
+                            }}>
+                                {
+                                    showData.map((value, index) => (
+                                        <div key={index}>{value}</div>
+                                    ))
+                                }
+                            </div>
+                        ) : (
+                            <div style={{ padding: "60px 0", position: 'relative' }}>
+                                <div>暂未生成</div>
+                            </div>
+                        )
+                    }
+                </div>
+            </div>
+        </Dialog>
+    );
+}
+
 export default function TaskList(props) {
 
     const [formDialog, setFormDialog] = React.useState(false);
@@ -582,6 +714,8 @@ export default function TaskList(props) {
     const [selectedIndex, setSelectedIndex] = React.useState(-1)
     const [openAlertBar, setOpenAlertBar] = React.useState(false)
     const [alertBarMsg, setAlertBarMsg] = React.useState("")
+    const [openDownloadBody, setOpenDownloadBody] = React.useState(false)
+    const [downloadBody, setDownloadBody] = React.useState({ "content": "", "url": "" })
 
     useEffect(() => {
         get_task_list()
@@ -616,6 +750,8 @@ export default function TaskList(props) {
             "keyword_like": value.original.keyword_like,
             "http_timeout": value.original.http_timeout,
             "check_timeout": value.original.check_timeout,
+            "sort": value.original.sort,
+            "concurrent": value.original.concurrent,
         }
     }
 
@@ -632,7 +768,7 @@ export default function TaskList(props) {
     }
 
     const task_add = (value) => {
-        axios.post("/tasks/add",  getTaskSaveData(value)).then(res => {
+        axios.post("/tasks/add", getTaskSaveData(value)).then(res => {
             if (res.data.code === "200") {
                 get_task_list()
             } else {
@@ -682,6 +818,19 @@ export default function TaskList(props) {
         })
     }
 
+    const getDownloadBody = (id) => {
+        axios.get("/tasks/get-download-body?task_id=" + id).then(res => {
+            setOpenDownloadBody(true)
+            setDownloadBody({ 'content': res.data.content, "url": res.data.url })
+        }).catch(e => {
+            handleOpenAlertBar("操作失败")
+        })
+    }
+
+    const handleDownloadClose = (val) => {
+        setOpenDownloadBody(val)
+    }
+
     return (
         <div>
             <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleClickOpen(null)}>新增</Button>
@@ -698,6 +847,11 @@ export default function TaskList(props) {
                 handleSave={handleSave}
                 handleDelete={handleDelete}
             />
+            <DownloadDialog
+                formValue={downloadBody}
+                open={openDownloadBody}
+                onClose={() => handleDownloadClose(false)}
+            />
             <TableContainer component={Paper}>
                 <Table sx={{ minWidth: 1024 }} aria-label="simple table">
                     <TableHead>
@@ -711,7 +865,13 @@ export default function TaskList(props) {
                     <TableBody>
                         {
                             taskList.map((row) => (
-                                <Row key={row.id} row={row} doTaskRightNow={doTaskRightNow} clickTask={() => handleClickOpen(row)} />
+                                <Row
+                                    key={row.id}
+                                    row={row}
+                                    doTaskRightNow={doTaskRightNow}
+                                    showDownloadDialog={getDownloadBody}
+                                    clickTask={() => handleClickOpen(row)}
+                                />
                             ))
                         }
                     </TableBody>

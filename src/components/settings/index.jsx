@@ -1,0 +1,212 @@
+import { useState, useContext, useEffect } from 'react'
+import * as React from 'react';
+import { MainContext } from './../../context/main';
+import Box from '@mui/material/Box';
+import FormControl from '@mui/material/FormControl';
+import TextField from '@mui/material/TextField';
+import LoadingButton from '@mui/lab/LoadingButton';
+import Divider from '@mui/material/Divider';
+import FormLabel from '@mui/material/FormLabel';
+import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
+import AddIcon from '@mui/icons-material/Add';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import Snackbar from '@mui/material/Snackbar';
+
+function AddSourceDialog(props) {
+    const { onClose, open, saveData } = props;
+
+    const [body, setBody] = useState('')
+
+    const handleClose = () => {
+        onClose(false);
+    };
+
+    const onChangeBody = (e) => {
+        setBody(e.target.value)
+    }
+
+    const doSave = () => {
+        saveData(body)
+    }
+
+    return (
+        <Dialog onClose={handleClose} open={open}>
+            <DialogTitle>自定义源添加</DialogTitle>
+            <div style={{
+                padding: '20px',
+                display: 'flex',
+                justifyContent: 'center',
+                flexDirection: 'column'
+            }}>
+                <FormControl style={{ width: '550px' }}>
+                    <TextField
+                        id="demo-simple-select-standard"
+                        value={body}
+                        multiline
+                        rows={10}
+                        onChange={onChangeBody}
+                    />
+                </FormControl>
+                <FormControl style={{ margin: '10px 0' }}>
+                    <LoadingButton
+                        onClick={doSave}
+                        variant="outlined"
+                    >
+                        保存
+                    </LoadingButton>
+                </FormControl>
+                <Box>格式：名称,https://xxxx.m3u + 换行，其中名称需要唯一，如下所示</Box>
+                <Box>名称1,https://xxxx.m3u</Box>
+                <Box>名称2,https://xxxx.m3u</Box>
+            </div>
+        </Dialog>
+    );
+}
+
+export default function Settings() {
+    const _mainContext = useContext(MainContext);
+    const [showAddSourceDialog, setShowAddSourceDialog] = useState(false)
+    const [httpRequestTimeout, setHttpRequestTimeout] = useState(8000);
+    const [concurrent, setConcurrent] = useState(1);
+    const [customLink, setCustomLink] = useState([]);
+    const [dialogMsg, setDialogMsg] = useState('');
+    const [openDialog, setOpenDialog] = useState(false);
+
+    useEffect(() => {
+        let config = _mainContext.settings
+        if(config !== null) {
+            setHttpRequestTimeout(config.httpRequestTimeout??8000)
+            setCustomLink(config.customLink??[])
+            setConcurrent(config.concurrent??1)
+        }
+    }, [_mainContext])
+
+    const handleChangeConfigSettings = (e) => {
+        const { name, value } = e.target;
+        let valueInt = parseInt(e.target.value, 10)
+        if (name === 'httpRequestTimeout') {
+            setHttpRequestTimeout(valueInt)
+        } else if (name === 'concurrent') {
+            if(valueInt === 0) {
+                valueInt = 1
+            }
+            setConcurrent(valueInt)
+        }
+    }
+
+    const doSaveConfigSettings = () => {
+        _mainContext.onChangeSettings({
+            httpRequestTimeout: httpRequestTimeout,
+            customLink: customLink,
+            concurrent: concurrent
+        })
+        setOpenDialog(true)
+        setDialogMsg('保存成功')
+    }
+
+    const handleShowAddSourceDialog = (val) => {
+        setShowAddSourceDialog(val)
+    }
+
+    const saveSource = (val) => {
+        let oriArr = customLink
+        console.log(oriArr, val)
+        let arr = val.split('\n')
+        if (arr.length > 0) {
+            for (let i = 0; i < arr.length; i++) {
+                let one = arr[i].split(',')
+                oriArr.push({
+                    name: one[0],
+                    url: one[1],
+                })
+            }
+            setCustomLink(oriArr)
+        }
+        setShowAddSourceDialog(false)
+    }
+
+    const delCustomLink = (i) => {
+        setCustomLink(customLink.filter((url, index) => index !== i))
+    }
+
+    const handleCloseDialogMsg = () => {
+        setOpenDialog(false)
+        setDialogMsg('')
+    }
+
+    return (
+        <Box style={{
+            padding: '0 20px'
+        }}>
+            <AddSourceDialog
+                open={showAddSourceDialog}
+                onClose={() => handleShowAddSourceDialog(false)}
+                saveData={saveSource}
+            />
+            <Snackbar
+                open={openDialog}
+                autoHideDuration={3000}
+                message={dialogMsg}
+                onClose={handleCloseDialogMsg}
+            />
+            <div style={{
+                fontSize: '40px',
+                padding: '50px 10px',
+                fontWeight: '600'
+            }}>系统设置</div>
+            <Divider style={{ marginBottom: '25px' }} />
+            <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                padding: '20px',
+                width: '300px'
+            }}>
+                <FormControl sx={{ marginBottom: '20px' }}>
+                    <FormLabel id="demo-row-radio-buttons-group-label">检测并发数</FormLabel>
+                    <TextField
+                        name="concurrent"
+                        value={concurrent}
+                        onChange={handleChangeConfigSettings}
+                    />
+                </FormControl>
+                <FormControl sx={{ marginBottom: '20px' }}>
+                    <FormLabel id="demo-row-radio-buttons-group-label">检查超时时间（毫秒）</FormLabel>
+                    <TextField
+                        name="httpRequestTimeout"
+                        value={httpRequestTimeout}
+                        onChange={handleChangeConfigSettings}
+                    />
+                </FormControl>
+                <FormControl sx={{ marginBottom: '20px' }}>
+                    <FormLabel id="demo-row-radio-buttons-group-label">
+                        自定义网络源
+                        <IconButton aria-label="添加" onClick={() => handleShowAddSourceDialog(true)}>
+                            <AddIcon />
+                        </IconButton>
+                    </FormLabel>
+                    <Box style={{ padding: '10px 0' }}>
+                        {
+                            customLink.map((value, index) => (
+                                <div key={index}>
+                                    <IconButton aria-label="删除" onClick={() => delCustomLink(index)}>
+                                        <DeleteIcon />
+                                    </IconButton>- {value.name} - {value.url}
+                                </div>
+                            ))
+                        }
+                    </Box>
+                </FormControl>
+                <LoadingButton
+                    onClick={doSaveConfigSettings}
+                    variant="outlined"
+                >
+                    保存
+                </LoadingButton>
+            </Box>
+        </Box>
+    )
+}

@@ -1,4 +1,4 @@
-<img alt="iptv-checker-web" src="https://github.com/zhimin-dev/iptv-checker-web/blob/main/src/assets/icon.png" height=80>
+<img alt="iptv-checker-ui" src="https://github.com/zhimin-dev/iptv-checker-web/blob/main/src/assets/icon.png" height=80>
 
 # iptv-checker-web
 
@@ -10,6 +10,8 @@ iptv-checker的web界面
 
 ## web变更日志
 
+- v4.0.0
+  - UI界面大更新
 - v3.2.1
   - 修复智能框解析数据错误问题
   - 后台任务支持排序

@@ -82,6 +82,7 @@ export default function Setting(props) {
     }
 
     useEffect(() => {
+        console.log(window.location)
         initVideoResolution()
     }, [])
 
@@ -92,10 +93,6 @@ export default function Setting(props) {
             save.push({ ...list[i], checked: false })
         }
         _mainContext.changeVideoResolution(save)
-    }
-
-    const goback = () => {
-        navigate("/")
     }
 
     const handleChangeSearchTitle = (e) => {
@@ -205,13 +202,13 @@ export default function Setting(props) {
     return (
         <Box sx={{
             position: 'fixed',
-            width: '100%',
-            height: _mainContext.headerHeight + "px",
+            width: 'calc(100%-250px)',
             borderBottom: '1px solid #eee',
             top: 0,
-            left: 0,
+            left: 270,
             zIndex: 999,
-            padding: '8px'
+            padding: '8px',
+            boxShadow:"1px 1px 4px pink"
         }}>
             <SimpleDialog
                 open={open}
@@ -222,16 +219,10 @@ export default function Setting(props) {
                 mod={dialogMod}
             />
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Box sx={{ maxWidth: "800px" }}>
+                <Box>
                     <Box sx={{ marginBottom: '10px' }}>
                         <FormControl sx={{ marginRight: '5px' }}>
-                            <LoadingButton
-                                size="small"
-                                onClick={goback}
-                                startIcon={<ArrowBackIcon />}
-                            >
-                                返回
-                            </LoadingButton>
+                            <Button startIcon={<FindInPageIcon />} size="small" onClick={showOriginalM3uBodyInfo} variant="outlined">原始数据</Button>
                         </FormControl>
                         <FormControl sx={{ marginRight: '5px' }}>
                             {
@@ -251,7 +242,7 @@ export default function Setting(props) {
                                         variant="outlined"
                                         startIcon={<HelpOutlineIcon />}
                                     >
-                                        检查直播源链接是否有效
+                                        检查
                                     </LoadingButton>
                                 </FormControl>
                             ) : ''
@@ -293,10 +284,14 @@ export default function Setting(props) {
                                     >
                                         有效链接
                                     </LoadingButton>
-                                    <FormControlLabel 
-                                    size="small"
-                                    control={<Checkbox size="small" checked={_mainContext.needFastSource} onChange={handleNeedFastSource} />} 
-                                    label="选择延迟最低的源" />
+                                    {
+                                        _mainContext.nowMod !== 1 ? (
+                                            <FormControlLabel 
+                                            size="small"
+                                            control={<Checkbox size="small" checked={_mainContext.needFastSource} onChange={handleNeedFastSource} />} 
+                                            label="选择延迟最低的源" />
+                                        ):''
+                                    }
                                 </FormControl>
                             ) : ''
                         }
@@ -479,21 +474,6 @@ export default function Setting(props) {
                             chipData.length > 0 || selectedGroups.length ? ',需要点击【搜索】按钮进行筛选' : ''
                         }
                     </Box>
-                </Box>
-                <Box sx={{ paddingRight: "10px" }}>
-                    <FormControl sx={{ marginRight: '5px' }}>
-                        <Button startIcon={<FindInPageIcon />} size="small" onClick={showOriginalM3uBodyInfo} variant="outlined">原始数据</Button>
-                    </FormControl>
-                    <FormControl sx={{ marginRight: '5px' }}>
-                        <LoadingButton
-                            size="small"
-                            onClick={showSetting}
-                            variant="outlined"
-                            startIcon={<SettingsIcon />}
-                        >
-                            设置
-                        </LoadingButton>
-                    </FormControl>
                 </Box>
             </Box>
         </Box>

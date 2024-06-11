@@ -41,6 +41,12 @@ let selectOptionWithNoWatch = [
   { 'mod': SystemInfo, "name": "系统信息" },
 ]
 
+let selectOptionWithWatch = [
+  { 'mod': ModSmartInput, "name": "智能识别框" },
+  { 'mod': ModPublicSource, "name": "公共订阅源" },
+  { 'mod': ModUploadFromLocal, "name": "本地上传" },
+]
+
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
@@ -105,7 +111,9 @@ export default function HorizontalLinearStepper() {
   const [systemInfo, setSystemInfo] = React.useState(null)
 
   useEffect(() => {
-    system_info()
+    if (_mainContext.nowMode === 0) {
+      system_info()
+    }
     fetchCommonLink()
     _mainContext.clearDetailData()
     fetchWatchOnlineData()
@@ -121,7 +129,10 @@ export default function HorizontalLinearStepper() {
   }, [])
 
   const getTabs = () => {
-    return selectOptionWithNoWatch
+    if (_mainContext.nowMode === 0) {
+      return selectOptionWithNoWatch
+    }
+    return selectOptionWithWatch
   }
 
   const fetchWatchOnlineData = async () => {
@@ -336,28 +347,36 @@ export default function HorizontalLinearStepper() {
             <input hidden type="file" onChange={HandleLocalUpload} />
           </Button>
         </TabPanel>
-        <TabPanel mod={mod} index={TaskList}>
-          <TaskListView></TaskListView>
-        </TabPanel>
-        <TabPanel mod={mod} index={SystemInfo}>
-          <div style={{ display: 'flex', flexDirection: 'column', fontSize: '16px' }}>
-            <span >当前{
-              systemInfo !== null ? (
-                systemInfo.can_ipv6 ? '支持' : (
-                  <span style={{ color: 'red', fontWeight: 'bold', fontSize: 20 }}>不支持</span>
-                )
-              ) : '后端服务未启动，暂不清楚是否支持'
-            }IPV6
-              {
-                systemInfo !== null && !systemInfo.can_ipv6 ? (
-                  '(需要您的网络环境支持才可以检测IPV6源！！！)'
-                ) : ''
-              }
-            </span>
-            <span >前端版本号:{nowVersion}</span>
-            <span >后端版本号:{systemInfo !== null ? systemInfo.version : '未知'}</span>
-          </div>
-        </TabPanel>
+        {
+          _mainContext.nowMode === 0 ? (
+            <TabPanel mod={mod} index={TaskList}>
+              <TaskListView></TaskListView>
+            </TabPanel>
+          ) : ''
+        }
+        {
+          _mainContext.nowMode === 0 ? (
+            <TabPanel mod={mod} index={SystemInfo}>
+              <div style={{ display: 'flex', flexDirection: 'column', fontSize: '16px' }}>
+                <span >当前{
+                  systemInfo !== null ? (
+                    systemInfo.can_ipv6 ? '支持' : (
+                      <span style={{ color: 'red', fontWeight: 'bold', fontSize: 20 }}>不支持</span>
+                    )
+                  ) : '后端服务未启动，暂不清楚是否支持'
+                }IPV6
+                  {
+                    systemInfo !== null && !systemInfo.can_ipv6 ? (
+                      '(需要您的网络环境支持才可以检测IPV6源！！！)'
+                    ) : ''
+                  }
+                </span>
+                <span >前端版本号:{nowVersion}</span>
+                <span >后端版本号:{systemInfo !== null ? systemInfo.version : '未知'}</span>
+              </div>
+            </TabPanel>
+          ) : ''}
+
         {
           (mod !== TaskList && mod !== SystemInfo) ? (
             <Box sx={{

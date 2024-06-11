@@ -63,6 +63,10 @@ export default function Detail() {
     _mainContext.deleteShowM3uRow(index)
   }
 
+  const watchThisRow = (val) => {
+    navigate("/watch?url="+val)
+  }
+
   const handleSelectCheckedAll = () => {
     let mod = 1//选中
     if (selectedArr.length > 0) {
@@ -107,12 +111,11 @@ export default function Detail() {
   }
 
   return (
-    <Box>
+    <Box style={{padding: '0 20px'}}>
       <Setting setSelectedArr={setSelectedArr} selectedArr={selectedArr}></Setting>
       <Paper style={{
         height: vTableHeight,
         marginTop: (_mainContext.headerHeight + 10) + "px",
-        minWidth: '800px'
       }}>
         <VirtualizedTable
           rowCount={_mainContext.showM3uBody.length}
@@ -122,7 +125,8 @@ export default function Detail() {
           selectAllRow={handleSelectCheckedAll}
           selectRow={onSelectedThisRow}
           seeDetail={seeDetail}
-          showOriginalUrl={_mainContext.settings.showFullUrl}
+          watchRow={watchThisRow}
+          // showOriginalUrl={_mainContext.settings.showFullUrl}
           selectedArr={selectedArr}
           selectAll={handleSelectCheckedAll}
           handleMod={_mainContext.handleMod}

@@ -150,9 +150,6 @@ export default function SimpleDialog(props) {
   const handleChangeConfigSettings = (e) => {
     const { name, value } = e.target;
     let data = value
-    if (name === 'showFullUrl') {
-      data = e.target.checked
-    }
     setConfigSettings(prevData => ({
       ...prevData,
       [name]: data
@@ -164,59 +161,6 @@ export default function SimpleDialog(props) {
       <Box style={{ minWidth: mod !== 3 ? '600px' : '', 'paddingTop': '10px', 'overflow':'hidden' }}>
         <span style={{ paddingLeft: '10px'}}>{showTextAreaLable}</span>
       </Box>
-      {
-        mod === 3 ? (
-          <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '20px'
-          }}>
-            <FormControl sx={{ width: 200, marginRight: '5px', marginBottom: '10px' }}>
-              <TextField
-                size="small"
-                name="checkSleepTime"
-                value={configSettings.checkSleepTime}
-                onChange={handleChangeConfigSettings}
-                label="下一次请求间隔时间（毫秒）"
-              />
-            </FormControl>
-            <FormControl sx={{
-              width: 220,
-              marginRight: '5px',
-              display: 'flex',
-              flexDirection: 'row',
-              marginBottom: '40px',
-              marginTop: '20px'
-            }}>
-              <span style={{fontSize: '12px'}}>不显示原始URL</span>
-              <Switch
-                size="small"
-                name="showFullUrl"
-                checked={configSettings.showFullUrl}
-                onChange={handleChangeConfigSettings}
-                inputProps={{ 'aria-label': 'controlled' }}
-              /><span style={{fontSize: '12px'}}>不显示原始URL</span>
-            </FormControl>
-            <FormControl sx={{ width: 200, marginRight: '5px', marginBottom: '10px' }}>
-              <TextField
-                size="small"
-                name="httpRequestTimeout"
-                value={configSettings.httpRequestTimeout}
-                onChange={handleChangeConfigSettings}
-                label="检查超时时间（毫秒）"
-              />
-            </FormControl>
-            <LoadingButton
-              size="small"
-              onClick={doSaveConfigSettings}
-              variant="outlined"
-              sx={{width: 200}}
-            >
-              保存
-            </LoadingButton>
-          </Box>
-        ) : ''
-      }
       {mod === 1 || mod === 2 ? (
         <FormControl sx={{ width: 550, margin: '10px' }}>
           <TextField multiline sx={{ fontSize: '11px' }} label={showTextAreaLable} size="small" id="standard-multiline-static" rows={4} value={_mainContext.exportDataStr} />
@@ -329,7 +273,7 @@ export default function SimpleDialog(props) {
               justifyContent: 'flex-end',
               marginTop: '5px'
             }}>
-              <Button variant="outlined" onClick={doTransferGroup}>确定</Button>
+              <Button variant="outlined" onClick={doTransferGroup}>{groupTab === 0? '更改':'新增'}</Button>
             </Box>
           </Box>
         ) : ''

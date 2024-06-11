@@ -1,10 +1,9 @@
 import React from 'react';
-import Box from '@mui/material/Box';
-import { MainContext } from './context/main';
-import Welcome from './components/welcome/index'
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { createTheme, ThemeProvider } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import CssBaseline from '@mui/material/CssBaseline';
+import Box from '@mui/material/Box';
+import Menu from './components/layout/menu'
 
 export default function App() {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
@@ -23,7 +22,7 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ minWidth: 100 }}>
-        <Welcome></Welcome>
+        <Menu></Menu>
       </Box>
     </ThemeProvider>
   );

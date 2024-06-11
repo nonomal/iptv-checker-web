@@ -14,6 +14,10 @@ import ErrorIcon from '@mui/icons-material/Error';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import InfoIcon from '@mui/icons-material/Info';
+import LiveTvIcon from '@mui/icons-material/LiveTv';
+import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
+import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
+import TagFacesIcon from '@mui/icons-material/TagFaces';
 
 export const classes = {
     flexContainer: 'ReactVirtualizedDemo-flexContainer',
@@ -80,7 +84,7 @@ class MuiVirtualizedTable extends React.PureComponent {
     }
 
     cellRenderer = ({ cellData, columnIndex }) => {
-        const { rowHeight, onRowClick, selectRow, delRow, originalData, showOriginalUrl, columns, seeDetail, handleMod } = this.props;
+        const { rowHeight, onRowClick, selectRow, delRow, watchRow, originalData, showOriginalUrl, columns, seeDetail, handleMod, nowMod } = this.props;
         return (
             <TableCell
                 component="div"
@@ -109,9 +113,9 @@ class MuiVirtualizedTable extends React.PureComponent {
                 {
                     columnIndex === 1 ? (
                         <div>
-                            <div style={{ fontWeight: '600', cursor:'pointer' }}>
+                            <div style={{ fontWeight: '600', cursor: 'pointer' }}>
                                 {cellData} - <span onClick={() => seeDetail(originalData[this.getObjectIndexIndex(cellData)])}>{originalData[this.getObjectIndexIndex(cellData)].name}</span>
-                                {
+                                {/* {
                                     handleMod !== 1 ? (
                                         <Tooltip title="删除">
                                             <IconButton size="small" onClick={() => delRow(cellData, columnIndex)}>
@@ -119,13 +123,18 @@ class MuiVirtualizedTable extends React.PureComponent {
                                             </IconButton>
                                         </Tooltip>
                                     ) : ''
+                                } */}
+                                {
+                                    handleMod !== 1 ? (
+                                        <Tooltip title="观看">
+                                            <IconButton size="small" onClick={() => watchRow(originalData[this.getObjectIndexIndex(cellData)].url)}>
+                                                <LiveTvIcon fontSize="small" sx={{ color: green[400] }} />
+                                            </IconButton>
+                                        </Tooltip>
+                                    ) : ''
                                 }
                             </div>
-                            {
-                                showOriginalUrl ? (
-                                    <div style={{ fontSize: '12px', color: '#7a7a7a' }}><i>{originalData[this.getObjectIndexIndex(cellData)].url}</i></div>
-                                ) : ''
-                            }
+                            <div style={{ fontSize: '12px', color: '#7a7a7a' }}><i>{originalData[this.getObjectIndexIndex(cellData)].url}</i></div>
                             <div style={{ fontSize: '12px', color: '#7a7a7a' }}>{originalData[this.getObjectIndexIndex(cellData)].video ? "" + originalData[this.getObjectIndexIndex(cellData)].video.width + "x" + originalData[this.getObjectIndexIndex(cellData)].video.height + "-" + originalData[this.getObjectIndexIndex(cellData)].video.codec + "" : ''}{'-'}{originalData[this.getObjectIndexIndex(cellData)].audio ? "" + originalData[this.getObjectIndexIndex(cellData)].audio.codec + "-" + originalData[this.getObjectIndexIndex(cellData)].audio.channels + " audio channels" : ''}</div>
                         </div>
                     ) : ''
@@ -144,17 +153,26 @@ class MuiVirtualizedTable extends React.PureComponent {
                             }
                             {
                                 originalData[this.getObjectIndexIndex(cellData)].status === 1 ? (
-                                    <div style={{
-                                        color: originalData[this.getObjectIndexIndex(cellData)].delay < 500 ? 'green' : 'red',
-                                        fontWeight: "bold",
-                                    }}>{originalData[this.getObjectIndexIndex(cellData)].delay}ms</div>
+                                        nowMod === 1 ? (
+                                            <div style={{
+                                                color: originalData[this.getObjectIndexIndex(cellData)].delay < 500 ? 'green' : 'red',
+                                                fontWeight: "bold",
+                                            }}>{originalData[this.getObjectIndexIndex(cellData)].delay}ms</div>
+                                        ):(
+                                            <Tooltip title="有效">
+                                                <Avatar sx={{ bgcolor: green[500], width: 24, height: 24 }}>
+                                                    <TagFacesIcon />
+                                                </Avatar>
+                                            </Tooltip>
+                                        )
+                                    
                                 ) : ''
                             }
                             {
                                 originalData[this.getObjectIndexIndex(cellData)].status === 2 ? (
                                     <Tooltip title="无效">
                                         <Avatar sx={{ bgcolor: pink[500], width: 24, height: 24 }}>
-                                            <ErrorIcon />
+                                            <SentimentVeryDissatisfiedIcon />
                                         </Avatar>
                                     </Tooltip>
                                 ) : ''
@@ -174,9 +192,8 @@ class MuiVirtualizedTable extends React.PureComponent {
                 className={clsx(classes.tableCell, classes.flexContainer, classes.noClick)}
                 variant="head"
                 style={{
-                    height: headerHeight,
                     width: columns[columnIndex].width + " !important",
-                    flex: "auto"
+                    flex: "auto",
                 }}
             >
                 {

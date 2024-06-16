@@ -33,7 +33,7 @@ export default function Watch() {
             },
             sources: [{
                 src: url,
-                type: 'application/x-mpegURL'
+                type: 'video/mp2t'
             }]
         })
     }
@@ -53,23 +53,6 @@ export default function Watch() {
             setM3u8Link(paramsObject["url"])
             onloadM3u8Link()
         }
-        // alert(location)
-        // let location = window.location;
-        // let originalParams = location.state.original
-        // if (originalParams === null || originalParams === undefined) {
-        // setOpen(true)
-        // } else {
-        //     let original = decodeURIComponent(originalParams)
-        //     let parseData = ParseM3u.parseOneM3uData(original)
-        //     if (parseData && parseData.exist) {
-        //         setName(parseData.name)
-        //         setLogoUrl(parseData.logoUrl)
-        //         iniotM3u8Link(parseData.url)
-        //         setHttpHeaders(parseData.copt)
-        //     } else {
-        //         setOpen(true)
-        //     }
-        // }
     }, [])
 
     const changeM3u8Link = (e) => {

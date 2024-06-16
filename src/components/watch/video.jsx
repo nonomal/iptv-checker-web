@@ -20,7 +20,7 @@ export const VideoJS = (props) => {
       videoElement.classList.add('vjs-big-play-centered');
       videoRef.current.appendChild(videoElement);
 
-      videojs.Vhs.xhr.beforeRequest = (options) => {
+      videojs.Vhs.xhr.onRequest = (options) => {
         if (!options.headers) {
           options.headers = {}
         }

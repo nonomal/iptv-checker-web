@@ -4,6 +4,9 @@ export const MainContext = createContext();
 import ParseM3u from '../utils/utils'
 import { invoke } from '@tauri-apps/api'
 import utils from '../utils/common'
+import { overrideGlobalXHR } from 'tauri-xhr'
+console.log('------init-----')
+overrideGlobalXHR()
 
 export const MainContextProvider = function ({ children }) {
     const headerHeight = 145

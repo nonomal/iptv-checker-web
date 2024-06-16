@@ -45,6 +45,7 @@ export default function Public() {
     }
 
     const fetchCommonLink = async (link) => {
+        let rows = [];
         for(let i = 0;i<link.length;i++) {
             rows.push({
                 "country":link[i].name,

@@ -1,0 +1,11 @@
+{
+    "translation": {
+      "Welcome to React": "欢迎使用iptv-checker",
+      "System Setting":"系统设置",
+      "menu source check":"检测源",
+      "menu public source":"公共订阅源",
+      "menu watch online":"在线观看",
+      "menu background task":"定时检查任务",
+      "menu system settings":"系统设置"
+    }
+}

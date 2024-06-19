@@ -15,6 +15,8 @@ import Settings from './components/settings';
 import Task from './components/task';
 import Check from './components/check'
 import Public from './components/public';
+import './utils/i18n';
+import { appWindow } from '@tauri-apps/api/window'
 
 const router = createBrowserRouter([
   {
@@ -60,3 +62,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </MainContextProvider>
   </React.StrictMode>
 )
+
+document
+  .getElementById('titlebar-minimize')
+  .addEventListener('click', () => appWindow.minimize())
+document
+  .getElementById('titlebar-maximize')
+  .addEventListener('click', () => appWindow.toggleMaximize())
+document
+  .getElementById('titlebar-close')
+  .addEventListener('click', () => appWindow.close())

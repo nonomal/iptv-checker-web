@@ -12,6 +12,7 @@ import MuiAlert from '@mui/material/Alert';
 import utils from './../../utils/common'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
+import { useTranslation, initReactI18next } from "react-i18next";
 
 const lastHomeUserInput = 'lastHomeUserInput'
 
@@ -21,12 +22,17 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 
 export default function Check() {
 
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const _mainContext = useContext(MainContext);
     const [body, setBody] = useState('')
     const [loading, setLoading] = useState(false)
     const [errorMsg, setErrorMsg] = useState('')
     const [showError, setShowError] = useState(false)
+
+    useEffect(()=> {
+        _mainContext.clearDetailData()
+    }, [])
 
     const handleChangeContent = (e) => {
         setBody(e.target.value);
@@ -92,7 +98,7 @@ export default function Check() {
                 fontSize: '40px',
                 padding: '50px 10px',
                 fontWeight: '600'
-            }}>检测源</div>
+            }}>{t("menu source check")}</div>
             <Snackbar open={showError} autoHideDuration={6000} onClose={handleCloseSnackBar}>
                 <Alert onClose={handleCloseSnackBar} severity="error" sx={{ width: '100%' }}>
                     {errorMsg}

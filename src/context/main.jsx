@@ -4,9 +4,8 @@ export const MainContext = createContext();
 import ParseM3u from '../utils/utils'
 import { invoke } from '@tauri-apps/api'
 import utils from '../utils/common'
+import i18n from "i18next";
 import { overrideGlobalXHR } from 'tauri-xhr'
-console.log('------init-----')
-overrideGlobalXHR()
 
 export const MainContextProvider = function ({ children }) {
     const headerHeight = 145
@@ -22,12 +21,21 @@ export const MainContextProvider = function ({ children }) {
     const [videoResolution, setVideoResolution] = useState([])//视频分辨率筛选
     const [needFastSource, setNeedFastSource] = useState(false)// 是否选择最快的源, false否， true是
     const [nowMod, setNowMod] = useState(1);// 当前运行模式 1客户端模式 0服务端模式
+    const [nowLanguage, setNowLanguage] = useState('en')
+    const [languageList, setLanguageList] = useState([{
+        'code':'en',
+        "name":"English"
+    }, {
+        'code':'zh',
+        "name":"中文"
+    }])
 
     const [settings, setSettings] = useState({
         checkSleepTime: 300,// 检查下一次请求间隔(毫秒)
         httpRequestTimeout: 8000,// http请求超时,0表示 无限制
         customLink: [],//自定义配置
         concurrent: 1,//并发数
+        language: 'en',//语言
     })
 
     const nowCheckUrlModRef = useRef()//当前操作类型
@@ -43,8 +51,15 @@ export const MainContextProvider = function ({ children }) {
         }
     }
 
+    const changeLanguage  = (val)=> {
+        console.log(val, '---')
+        setNowLanguage(val)
+        i18n.changeLanguage(val)
+    }
+
     useEffect(() => {
         invoke('now_mod', {}).then((response) => {
+            overrideGlobalXHR()
             setNowMod(response)
         }).catch(e => {
             console.log(e)
@@ -52,7 +67,9 @@ export const MainContextProvider = function ({ children }) {
         let setting = localStorage.getItem('settings')
         if (setting !== '') {
             try {
-                setSettings(JSON.parse(setting))
+                let data = JSON.parse(setting)
+                changeLanguage(data.language)
+                setSettings(data)
             } catch (e) {
                 console.log(e)
             }
@@ -432,6 +449,7 @@ export const MainContextProvider = function ({ children }) {
     const doCheck = async (data) => {
         let arr = chunkArray(data, settings.concurrent)
         if (nowMod === 1) {
+            console.log("start check")
             for(let i = 0;i<arr.length;i++) {
                 let nowData = [];
                 let allRequest = [];
@@ -439,48 +457,49 @@ export const MainContextProvider = function ({ children }) {
                     nowData.push(arr[i][j])
                     allRequest.push(axios.get(arr[i][j].url, {timeout:settings.httpRequestTimeout}))
                 }
-                Promise.allSettled(allRequest).then((results) => {
-                    results.forEach((result,index) => {
-                        let videoInfoMap = videoInfoRef.current
-                        let one = nowData[index];
-                        if (result.status === 'fulfilled') {
-                            const response = result.value;
-                            let delay = -1;
-                            videoInfoMap[one.url] = {
-                                "video": null,
-                                "audio": null,
-                                "videoType": null,
-                                "status": 1,
-                                'delay': delay,
+                const results = await Promise.allSettled(allRequest);
+                console.log("res", results)
+                results.forEach((result,index) => {
+                    let videoInfoMap = videoInfoRef.current
+                    let one = nowData[index];
+                    if (result.status === 'fulfilled') {
+                        const response = result.value;
+                        let delay = -1;
+                        videoInfoMap[one.url] = {
+                            "video": null,
+                            "audio": null,
+                            "videoType": null,
+                            "status": 1,
+                            'delay': delay,
+                        }
+                        let videoFastNameMap = videoFastNameMapRef.current
+                        if (videoFastNameMap[one.sName] === undefined || videoFastNameMap[one.sName] === null) {
+                            videoFastNameMap[one.sName] = {
+                                index: one.index,
+                                delay: delay
                             }
-                            let videoFastNameMap = videoFastNameMapRef.current
-                            if (videoFastNameMap[one.sName] === undefined || videoFastNameMap[one.sName] === null) {
+                        } else {
+                            if (videoFastNameMap[one.sName].delay >= delay) {
                                 videoFastNameMap[one.sName] = {
                                     index: one.index,
                                     delay: delay
                                 }
-                            } else {
-                                if (videoFastNameMap[one.sName].delay >= delay) {
-                                    videoFastNameMap[one.sName] = {
-                                        index: one.index,
-                                        delay: delay
-                                    }
-                                }
                             }
-                            setShowM3uBodyStatus(one.index, 1, null, null, delay)
-                            setCheckDataStatus(one.index, 1)
-                        } else {
-                            videoInfoMap[one.url] = {
-                                "status": 2,
-                            }
-                            setShowM3uBodyStatus(one.index, 2, null, null, 0)
-                            setCheckDataStatus(one.index, 2)
                         }
-                    });
-                })
+                        setShowM3uBodyStatus(one.index, 1, null, null, delay)
+                        setCheckDataStatus(one.index, 1)
+                    } else {
+                        videoInfoMap[one.url] = {
+                            "status": 2,
+                        }
+                        setShowM3uBodyStatus(one.index, 2, null, null, 0)
+                        setCheckDataStatus(one.index, 2)
+                    }
+                });
                 hasCheckedCountRef.current += settings.concurrent
                 setHasCheckedCount(hasCheckedCountRef.current)
             }
+            console.log("end check")
         } else {
             for (let i = 0; i < arr.length; i++) {
                 if (nowCheckUrlModRef.current === 2) {
@@ -565,7 +584,7 @@ export const MainContextProvider = function ({ children }) {
         nowCheckUrlModRef.current = 1
         setHandleMod(1)
         let data = prepareCheckData()
-        doCheck(data)
+        await doCheck(data)
         setCheckDataIsFinished()
     }
 
@@ -631,8 +650,7 @@ export const MainContextProvider = function ({ children }) {
     const resumeCheckUrlData = async () => {
         setCheckUrlMod(1)
         nowCheckUrlModRef.current = 1
-        await sleep(100)
-        doCheck(checkData)
+        await doCheck(checkData)
         setCheckDataIsFinished()
     }
 
@@ -654,7 +672,8 @@ export const MainContextProvider = function ({ children }) {
             onChangeExportStr, batchChangeGroupName, addGroupName, getCheckUrl,
             pauseCheckUrlData, resumeCheckUrlData, strToCsv, clearDetailData,
             getM3uBody,
-            needFastSource, onChangeNeedFastSource, nowMod, getBodyType
+            needFastSource, onChangeNeedFastSource, nowMod, getBodyType,
+            nowLanguage, changeLanguage,languageList
         }}>
             {children}
         </MainContext.Provider>

@@ -37,6 +37,7 @@ export default function Watch() {
             }]
         })
     }
+    const playerRef = React.useRef(null);
     const [name, setName] = useState('')
     const [logoUrl, setLogoUrl] = useState('')
     const [m3u8Link, setM3u8Link] = useState('')
@@ -61,6 +62,10 @@ export default function Watch() {
 
     const onloadM3u8Link = () => {
         setVideoOptions(m3u8Link)
+        console.log(playerRef.current)
+        if(playerRef.current !== null) {
+            playerRef.current.play()
+        }
     }
 
     const stopLoadM3u8Link = () => {
@@ -92,8 +97,6 @@ export default function Watch() {
     const addNewHttpHeader = () => {
         setHttpHeaders([...httpHeaders, { key: '', value: '' }])
     }
-
-    const playerRef = React.useRef(null);
 
     const handlePlayerReady = (player) => {
         playerRef.current = player;

@@ -22,39 +22,59 @@ import PublicIcon from '@mui/icons-material/Public';
 import CloudQueueIcon from '@mui/icons-material/CloudQueue';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import _package from './../../../package';
+import { useTranslation, initReactI18next } from "react-i18next";
+import { appWindow } from '@tauri-apps/api/window'
 
 let menuList = [{
     "name": "检测源",
+    "ename":"menu source check",
     "uri": "/check",
     "icon": "AdjustIcon",
     'showMod':[0,1]
 }, {
     "name": "公共订阅源",
     "uri": "/public",
+    "ename":"menu public source",
     "icon": "PublicIcon",
     'showMod':[0,1]
 },{
     "name": "在线观看",
     "uri": "/watch",
+    "ename":"menu watch online",
     "icon": "RemoveRedEyeIcon",
     'showMod':[1]
 }, {
     "name": "定时检查任务",
     "uri": "/task",
+    "ename":"menu background task",
     "icon": "CloudQueueIcon",
     'showMod':[0]
 }, {
     "name": "系统设置",
     "uri": "/settings",
+    "ename":"menu system settings",
     "icon": "SettingsIcon",
     'showMod':[0,1]
 }]
 
 export default function Layout() {
+    const { t } = useTranslation();
     const _mainContext = useContext(MainContext);
     const navigate = useNavigate();
 
     const nowVersion = _package.version;
+
+    useEffect(() => {
+        document
+        .getElementById('titlebar-minimize')
+        .addEventListener('click', () => appWindow.minimize())
+        document
+        .getElementById('titlebar-maximize')
+        .addEventListener('click', () => appWindow.toggleMaximize())
+        document
+        .getElementById('titlebar-close')
+        .addEventListener('click', () => appWindow.close())
+    }, [])
 
     const changePath = (e) => {
         navigate(e.uri)
@@ -96,7 +116,7 @@ export default function Layout() {
                                                 value.icon === 'RemoveRedEyeIcon' ? <RemoveRedEyeIcon /> : ''
                                             }
                                         </ListItemIcon>
-                                        <ListItemText primary={value.name} />
+                                        <ListItemText primary={t(value.ename)} />
                                     </ListItemButton>
                                 </ListItem>
                             ):''
@@ -104,6 +124,23 @@ export default function Layout() {
                 </List>
             </Box>
             <Box className="container-inner">
+            <div data-tauri-drag-region class="titlebar">
+                <div class="titlebar-button" id="titlebar-minimize">
+                    <img
+                    src="https://api.iconify.design/mdi:window-minimize.svg"
+                    alt="minimize"
+                    />
+                </div>
+                <div class="titlebar-button" id="titlebar-maximize">
+                    <img
+                    src="https://api.iconify.design/mdi:window-maximize.svg"
+                    alt="maximize"
+                    />
+                </div>
+                <div class="titlebar-button" id="titlebar-close">
+                    <img src="https://api.iconify.design/mdi:close.svg" alt="close" />
+                </div>
+                </div>
                 <Outlet/>
             </Box>
         </div>

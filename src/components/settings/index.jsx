@@ -15,8 +15,13 @@ import AddIcon from '@mui/icons-material/Add';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import Snackbar from '@mui/material/Snackbar';
+import { useTranslation, initReactI18next } from "react-i18next";
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 
 function AddSourceDialog(props) {
+
     const { onClose, open, saveData } = props;
 
     const [body, setBody] = useState('')
@@ -72,9 +77,11 @@ export default function Settings() {
     const [showAddSourceDialog, setShowAddSourceDialog] = useState(false)
     const [httpRequestTimeout, setHttpRequestTimeout] = useState(8000);
     const [concurrent, setConcurrent] = useState(1);
+    const [language, setLanguage] = useState('en');
     const [customLink, setCustomLink] = useState([]);
     const [dialogMsg, setDialogMsg] = useState('');
     const [openDialog, setOpenDialog] = useState(false);
+    const { t } = useTranslation();
 
     useEffect(() => {
         let config = _mainContext.settings
@@ -82,6 +89,7 @@ export default function Settings() {
             setHttpRequestTimeout(config.httpRequestTimeout??8000)
             setCustomLink(config.customLink??[])
             setConcurrent(config.concurrent??1)
+            setLanguage(config.language??'en')
         }
     }, [_mainContext])
 
@@ -95,6 +103,8 @@ export default function Settings() {
                 valueInt = 1
             }
             setConcurrent(valueInt)
+        } else if(name === 'language') {
+            setLanguage(e.target.value)
         }
     }
 
@@ -102,8 +112,10 @@ export default function Settings() {
         _mainContext.onChangeSettings({
             httpRequestTimeout: httpRequestTimeout,
             customLink: customLink,
-            concurrent: concurrent
+            concurrent: concurrent,
+            language: language
         })
+        _mainContext.changeLanguage(language)
         setOpenDialog(true)
         setDialogMsg('保存成功')
     }
@@ -157,7 +169,7 @@ export default function Settings() {
                 fontSize: '40px',
                 padding: '50px 10px',
                 fontWeight: '600'
-            }}>系统设置</div>
+            }}>{t('System Setting')}</div>
             <Divider style={{ marginBottom: '25px' }} />
             <Box sx={{
                 display: 'flex',
@@ -165,6 +177,22 @@ export default function Settings() {
                 padding: '20px',
                 width: '300px'
             }}>
+
+                <FormControl  sx={{ marginBottom: '20px' }}>
+                    <InputLabel id="demo-row-radio-buttons-group-label">选择语言</InputLabel>
+                    <Select
+                        name="language"
+                        value={language}
+                        label="选择语言"
+                        onChange={handleChangeConfigSettings}
+                    >
+                        {
+                            _mainContext.languageList.map((val,index) => (
+                                <MenuItem key={index} value={val.code}>{val.name}</MenuItem>
+                            ))
+                        }
+                    </Select>
+                </FormControl>
                 <FormControl sx={{ marginBottom: '20px' }}>
                     <FormLabel id="demo-row-radio-buttons-group-label">检测并发数</FormLabel>
                     <TextField

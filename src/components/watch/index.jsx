@@ -8,9 +8,7 @@ import { MainContext } from './../../context/main';
 import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-import VideoSettingsIcon from '@mui/icons-material/VideoSettings';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
-import ParseM3u from '../../utils/utils'
 import { useLocation } from 'react-router-dom';
 import VideoJS from './video'
 import Divider from '@mui/material/Divider';
@@ -62,7 +60,6 @@ export default function Watch() {
 
     const onloadM3u8Link = () => {
         setVideoOptions(m3u8Link)
-        console.log(playerRef.current)
         if(playerRef.current !== null) {
             playerRef.current.play()
         }

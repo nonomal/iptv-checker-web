@@ -9,10 +9,46 @@ import { VirtualizedTable } from './vtable'
 import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import VideoJS from './../watch/video'
+import Dialog from '@mui/material/Dialog';
 
 export default function Detail() {
   const _mainContext = useContext(MainContext);
   const [vTableHeight, setVTableHeight] = useState(550)
+  const [videoJsOptions, setVideoJsOptions] = useState(null)
+  const [showWatch, setShowWatch] = useState(false)
+  const playerRef = React.useRef(null);
+  const handlePlayerReady = (player) => {
+      playerRef.current = player;
+
+      // You can handle player events here, for example:
+      player.on('waiting', () => {
+          console.log('player is waiting');
+      });
+
+      player.on('dispose', () => {
+          console.log('player will dispose');
+      });
+  };
+  const [httpHeaders, setHttpHeaders] = useState([])
+  const setVideoOptions = (url) => {
+    setVideoJsOptions({
+        autoplay: true,
+        controls: true,
+        responsive: true,
+        fluid: true,
+        html5: {
+            vhs: {
+                withCredentials: true,
+                overrideNative: true
+            }
+        },
+        sources: [{
+            src: url,
+            type: 'video/mp2t'
+        }]
+    })
+}
 
   const navigate = useNavigate();
   const [selectedArr, setSelectedArr] = useState([])//已选中的id
@@ -64,7 +100,8 @@ export default function Detail() {
   }
 
   const watchThisRow = (val) => {
-    navigate("/watch?url="+val)
+    setShowWatch(true)
+    setVideoOptions(val)
   }
 
   const handleSelectCheckedAll = () => {
@@ -110,9 +147,18 @@ export default function Detail() {
     setShowChannelMod(2)
   }
 
+  const handleWatchClose = () => {
+    setShowWatch(false)
+  }
+
   return (
     <Box style={{padding: '0 20px'}}>
       <Setting setSelectedArr={setSelectedArr} selectedArr={selectedArr}></Setting>
+      <Dialog onClose={handleWatchClose} open={showWatch}>
+        <div style={{width:'300px'}}>
+          <VideoJS options={videoJsOptions} onReady={handlePlayerReady} headers={httpHeaders} />
+        </div>
+      </Dialog>
       <Paper style={{
         height: vTableHeight,
         marginTop: (_mainContext.headerHeight + 10) + "px",

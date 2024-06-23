@@ -36,6 +36,7 @@ export const MainContextProvider = function ({ children }) {
         customLink: [],//自定义配置
         concurrent: 1,//并发数
         language: 'en',//语言
+        privateHost:'',//私有host
     })
 
     const nowCheckUrlModRef = useRef()//当前操作类型

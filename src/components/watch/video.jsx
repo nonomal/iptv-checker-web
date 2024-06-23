@@ -16,6 +16,7 @@ export const VideoJS = (props) => {
     if (!playerRef.current) {
       // The Video.js player needs to be _inside_ the component el for React 18 Strict Mode. 
       const videoElement = document.createElement("video-js");
+      // var playAndFullscreen = document.getElementsByClassName('play-and-fullscreen')[0];
 
       videoElement.classList.add('vjs-big-play-centered');
       videoRef.current.appendChild(videoElement);
@@ -37,14 +38,19 @@ export const VideoJS = (props) => {
         videojs.log('player is ready');
         onReady && onReady(player);
       });
+      // console.log(player.isFullscreen())
+      // player.requestFullscreen()
+      // player.on("fullscreenchange", function(e) {
+      //   console.log(e)
+      // })
       if (typeof player.httpSourceSelector === "function" && player) {
         console.log("---httpSourceSelector")
         player.httpSourceSelector();
       }
-      let qualityLevels = player.qualityLevels();
-      console.log("---qualityLevels", qualityLevels)
-      qualityLevels.selectedIndex_ = 0;
-      qualityLevels.trigger({ type: 'change', selectedIndex: 0 });
+      // let qualityLevels = player.qualityLevels();
+      // console.log("---qualityLevels", qualityLevels)
+      // qualityLevels.selectedIndex_ = 0;
+      // qualityLevels.trigger({ type: 'change', selectedIndex: 0 });
 
       // You could update an existing player in the `else` block here
       // on prop change, for example:
@@ -54,10 +60,10 @@ export const VideoJS = (props) => {
         console.log("---httpSourceSelector")
         player.httpSourceSelector();
       }
-      let qualityLevels = player.qualityLevels();
-      console.log("---qualityLevels", qualityLevels)
-      qualityLevels.selectedIndex_ = 0;
-      qualityLevels.trigger({ type: 'change', selectedIndex: 0 });
+      // let qualityLevels = player.qualityLevels();
+      // console.log("---qualityLevels", qualityLevels)
+      // qualityLevels.selectedIndex_ = 0;
+      // qualityLevels.trigger({ type: 'change', selectedIndex: 0 });
 
       player.autoplay(options.autoplay);
       player.src(options.sources);

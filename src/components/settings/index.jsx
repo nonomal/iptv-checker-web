@@ -79,6 +79,7 @@ export default function Settings() {
     const [concurrent, setConcurrent] = useState(1);
     const [language, setLanguage] = useState('en');
     const [customLink, setCustomLink] = useState([]);
+    const [privateHost, setPrivateHost] = useState('')
     const [dialogMsg, setDialogMsg] = useState('');
     const [openDialog, setOpenDialog] = useState(false);
     const { t } = useTranslation();
@@ -90,6 +91,7 @@ export default function Settings() {
             setCustomLink(config.customLink??[])
             setConcurrent(config.concurrent??1)
             setLanguage(config.language??'en')
+            setPrivateHost(config.privateHost??'')
         }
     }, [_mainContext])
 
@@ -105,6 +107,8 @@ export default function Settings() {
             setConcurrent(valueInt)
         } else if(name === 'language') {
             setLanguage(e.target.value)
+        } else if (name === 'privateHost') {
+            setPrivateHost(e.target.value)
         }
     }
 
@@ -113,7 +117,8 @@ export default function Settings() {
             httpRequestTimeout: httpRequestTimeout,
             customLink: customLink,
             concurrent: concurrent,
-            language: language
+            language: language,
+            privateHost: privateHost
         })
         _mainContext.changeLanguage(language)
         setOpenDialog(true)
@@ -206,6 +211,14 @@ export default function Settings() {
                     <TextField
                         name="httpRequestTimeout"
                         value={httpRequestTimeout}
+                        onChange={handleChangeConfigSettings}
+                    />
+                </FormControl>
+                <FormControl sx={{ marginBottom: '20px' }}>
+                    <FormLabel id="demo-row-radio-buttons-group-label">后台检查server域名,示例：http://127.0.0.1:8089</FormLabel>
+                    <TextField
+                        name="privateHost"
+                        value={privateHost}
                         onChange={handleChangeConfigSettings}
                     />
                 </FormControl>

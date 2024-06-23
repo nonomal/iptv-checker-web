@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { useEffect } from "react"
+import { useEffect, useContext, useRef } from "react"
+import { MainContext } from './../../context/main';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import Box from '@mui/material/Box';
@@ -41,6 +42,7 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from '@mui/material/FormLabel';
 import Divider from '@mui/material/Divider';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 const run_type_list = [{ "value": "EveryDay", "name": "每天" }, { "value": "EveryHour", "name": "每小时" }]
 const output_folder = "static/output/"
@@ -266,7 +268,7 @@ function TaskForm(props) {
     }
 
     const deleteThisLikeKw = (i) => {
-        let kw = task.original.keyword_like;
+        let kw = task.original.keyword_like??[];
         kw.splice(i, 1)
         setTask({
             ...task,
@@ -608,7 +610,7 @@ function Row(props) {
                                     row.original.keyword_dislike !== null ? (
                                         <TableRow key="dislike-row">
                                             <TableCell component="th" scope="row">
-                                                不喜欢关键词：{row.original.keyword_dislike.join("、")}
+                                                不喜欢关键词：{row.original.keyword_dislike?row.original.keyword_dislike.join("、"):''}
                                             </TableCell>
                                         </TableRow>
                                     ) : ''
@@ -617,7 +619,7 @@ function Row(props) {
                                     row.original.keyword_like !== null ? (
                                         <TableRow key="like-row">
                                             <TableCell component="th" scope="row">
-                                                喜欢关键词：{row.original.keyword_like.join("、")}
+                                                喜欢关键词：{row.original.keyword_like?row.original.keyword_like.join("、"):''}
                                             </TableCell>
                                         </TableRow>
                                     ) : ''
@@ -646,7 +648,6 @@ function DownloadDialog(props) {
         if (formValue.content !== '') {
             setShowData(formValue.content.split("\n"))
         } else {
-            console.log('---')
             setShowData([])
         }
     }, [formValue])
@@ -708,6 +709,20 @@ function DownloadDialog(props) {
 }
 
 export default function TaskList(props) {
+    const _mainContext = useContext(MainContext);
+
+    const privateHostRef = useRef("")
+
+    useEffect(() => {
+        let config = _mainContext.settings
+        if(config !== null) {
+            if(config.privateHost !== '') {
+                setPrivateHost(config.privateHost)
+                privateHostRef.current = config.privateHost
+                get_task_list()
+            }
+        }
+    }, [_mainContext])
 
     const [formDialog, setFormDialog] = React.useState(false);
     const [formValue, setFormValue] = React.useState(null);
@@ -717,10 +732,11 @@ export default function TaskList(props) {
     const [alertBarMsg, setAlertBarMsg] = React.useState("")
     const [openDownloadBody, setOpenDownloadBody] = React.useState(false)
     const [downloadBody, setDownloadBody] = React.useState({ "content": "", "url": "" })
+    const [privateHost, setPrivateHost] = React.useState('')
 
-    useEffect(() => {
-        get_task_list()
-    }, []);
+    // useEffect(() => {
+    //     get_task_list()
+    // }, [privateHost]);
 
     const handleClickOpen = (value) => {
         setFormValue(value)
@@ -757,7 +773,7 @@ export default function TaskList(props) {
     }
 
     const update_task = (value) => {
-        axios.post("/tasks/update?task_id=" + value.id, getTaskSaveData(value)).then(res => {
+        axios.post(getHost() + "/tasks/update?task_id=" + value.id, getTaskSaveData(value)).then(res => {
             if (res.data.code === "200") {
                 get_task_list()
             } else {
@@ -768,8 +784,12 @@ export default function TaskList(props) {
         })
     }
 
+    const getHost = () => {
+        return privateHostRef.current
+    }
+
     const task_add = (value) => {
-        axios.post("/tasks/add", getTaskSaveData(value)).then(res => {
+        axios.post(getHost()+"/tasks/add", getTaskSaveData(value)).then(res => {
             if (res.data.code === "200") {
                 get_task_list()
             } else {
@@ -781,7 +801,7 @@ export default function TaskList(props) {
     }
 
     const handleDelete = (value) => {
-        axios.delete("tasks/delete/" + value.id).then(res => {
+        axios.delete(getHost()+"/tasks/delete/" + value.id).then(res => {
             if (res.data.code === "200") {
                 get_task_list()
             } else {
@@ -793,7 +813,9 @@ export default function TaskList(props) {
     }
 
     const get_task_list = () => {
-        axios.get("/tasks/list").then(res => {
+        let url = getHost()+"/tasks/list"
+        console.log(url)
+        axios.get(url).then(res => {
             setTaskList(res.data.list)
         }).catch(e => {
             setTaskList([])
@@ -812,7 +834,7 @@ export default function TaskList(props) {
     }
 
     const doTaskRightNow = (id) => {
-        axios.get("/tasks/run?task_id=" + id).then(res => {
+        axios.get(getHost()+"/tasks/run?task_id=" + id).then(res => {
             get_task_list()
         }).catch(e => {
             handleOpenAlertBar("操作失败")
@@ -820,7 +842,7 @@ export default function TaskList(props) {
     }
 
     const getDownloadBody = (id) => {
-        axios.get("/tasks/get-download-body?task_id=" + id).then(res => {
+        axios.get(getHost()+"/tasks/get-download-body?task_id=" + id).then(res => {
             setOpenDownloadBody(true)
             setDownloadBody({ 'content': res.data.content, "url": res.data.url })
         }).catch(e => {
@@ -832,18 +854,33 @@ export default function TaskList(props) {
         setOpenDownloadBody(val)
     }
 
+    const refreshList = () => {
+        setTaskList([])
+        get_task_list()
+    }
+
     return (
         <Box style={{padding: '0 20px'}}>
             <div style={{ fontSize: '40px',
                 padding: '50px 10px',
                 fontWeight: '600' }}>定时检查任务</div>
             <Divider style={{ marginBottom: '25px' }} />
-            <Button 
-            variant="contained" 
-            startIcon={<AddIcon />} 
-            onClick={() => handleClickOpen(null)}
-            style={{marginBottom: '10px'}}
-            >新增</Button>
+            {
+                privateHost ? (
+            <>
+            <Box style={{marginBottom: '10px'}}>
+                <Button 
+                variant="contained" 
+                startIcon={<AddIcon />} 
+                onClick={() => handleClickOpen(null)}
+                style={{marginRight: '10px'}}
+                >新增</Button>
+                <Button 
+                variant="outlined" 
+                startIcon={<RefreshIcon />} 
+                onClick={() => refreshList()}
+                >刷新列表</Button>
+            </Box>
             <Snackbar
                 open={openAlertBar}
                 autoHideDuration={6000}
@@ -862,6 +899,7 @@ export default function TaskList(props) {
                 open={openDownloadBody}
                 onClose={() => handleDownloadClose(false)}
             />
+            <p>当前设置的【后台检查server域名】为：{privateHost}</p>
             <Paper sx={{ width: '1024px', overflow: 'hidden' }}>
                 <TableContainer>
                 <Table aria-label="simple table">
@@ -889,6 +927,10 @@ export default function TaskList(props) {
                 </Table>
             </TableContainer>
             </Paper>
+            </>
+            ):(
+                <Box>对不起，您没有设置【后台检查server域名】，请至设置页面操作后再来查看</Box>
+            )}
         </Box>
     );
 }

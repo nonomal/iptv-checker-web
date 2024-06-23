@@ -48,7 +48,7 @@ let menuList = [{
     "uri": "/task",
     "ename":"menu background task",
     "icon": "CloudQueueIcon",
-    'showMod':[0]
+    'showMod':[0,1]
 }, {
     "name": "系统设置",
     "uri": "/settings",

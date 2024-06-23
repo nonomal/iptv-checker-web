@@ -183,29 +183,6 @@ export default function Watch() {
                         alignItems: 'center',
                     }}>
                         {name}
-                        {/* {
-                            m3u8Link !== '' && !isPlaying ? (
-                                <LoadingButton
-                                    size="small"
-                                    onClick={onloadM3u8Link}
-                                    variant="contained"
-                                    startIcon={<PlayCircleOutlineIcon />}
-                                >
-                                    播放
-                                </LoadingButton>
-                            ) : ''}
-                        {
-                            m3u8Link !== '' && isPlaying ? (
-                                <LoadingButton
-                                    size="small"
-                                    onClick={stopLoadM3u8Link}
-                                    variant="contained"
-                                    startIcon={<StopCircleIcon />}
-                                >
-                                    停止
-                                </LoadingButton>
-                            ) : ''
-                        } */}
                     </h2>
                 </Box>
                 <FormControl sx={{ margin: '10px' }}>

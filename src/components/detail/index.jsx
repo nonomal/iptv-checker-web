@@ -11,6 +11,8 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import VideoJS from './../watch/video'
 import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import { appWindow } from "@tauri-apps/api/window";
 
 export default function Detail() {
   const _mainContext = useContext(MainContext);
@@ -29,7 +31,22 @@ export default function Detail() {
       player.on('dispose', () => {
           console.log('player will dispose');
       });
+
+      player.on('fullscreen', (e) => {
+        console.log('full s', e)
+      })
+
+      player.ready(function() {
+        var fullScreenButton = player.controlBar.fullscreenToggle;
+      
+        fullScreenButton.on('click', function() {
+          appWindow.setFullscreen(true).then(res => {
+            console.log("set full screeen")
+          });
+        });
+      });
   };
+
   const [httpHeaders, setHttpHeaders] = useState([])
   const setVideoOptions = (url) => {
     setVideoJsOptions({
@@ -155,7 +172,7 @@ export default function Detail() {
     <Box style={{padding: '0 20px'}}>
       <Setting setSelectedArr={setSelectedArr} selectedArr={selectedArr}></Setting>
       <Dialog onClose={handleWatchClose} open={showWatch}>
-        <div style={{width:'300px'}}>
+        <div style={{ width: '500px'}}>
           <VideoJS options={videoJsOptions} onReady={handlePlayerReady} headers={httpHeaders} />
         </div>
       </Dialog>

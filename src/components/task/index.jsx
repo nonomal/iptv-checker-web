@@ -43,6 +43,9 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from '@mui/material/FormLabel';
 import Divider from '@mui/material/Divider';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import { writeTextFile, BaseDirectory } from '@tauri-apps/api/fs';
+import { save } from '@tauri-apps/api/dialog';
+import { downloadDir } from '@tauri-apps/api/path';
 
 const run_type_list = [{ "value": "EveryDay", "name": "每天" }, { "value": "EveryHour", "name": "每小时" }]
 const output_folder = "static/output/"
@@ -652,8 +655,19 @@ function DownloadDialog(props) {
         }
     }, [formValue])
 
-    const downloadFile = (url) => {
-        window.open(url)
+    const downloadFile = async() => {
+        // window.open(url)
+        const downloadDirPath = await downloadDir();
+        console.log(downloadDirPath)
+        let download_name = downloadDirPath + 'iptv-checker-file-'+new Date().getTime()+".m3u"
+        const filePath = await save({
+            defaultPath: download_name,
+            filters: [{
+              name: download_name,
+              extensions: ['m3u']
+            }]
+        });
+        filePath && await writeTextFile(download_name, formValue.content)
     }
 
     return (
@@ -813,7 +827,7 @@ export default function TaskList(props) {
     }
 
     const get_task_list = () => {
-        let url = getHost()+"/tasks/list"
+        let url = getHost()+"/tasks/list?page=1"
         console.log(url)
         axios.get(url).then(res => {
             setTaskList(res.data.list)

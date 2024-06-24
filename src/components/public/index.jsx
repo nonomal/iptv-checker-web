@@ -2,8 +2,6 @@ import { useState, useContext, useEffect } from 'react'
 import { MainContext } from './../../context/main';
 import Box from '@mui/material/Box';
 import FormControl from '@mui/material/FormControl';
-import TextField from '@mui/material/TextField';
-import Switch from '@mui/material/Switch';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Divider from '@mui/material/Divider';
 import InputLabel from '@mui/material/InputLabel';

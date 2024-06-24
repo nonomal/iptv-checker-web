@@ -10,7 +10,6 @@ import {
 import Detail from './components/detail'
 import Watch from './components/watch'
 import Menu from './components/layout/menu'
-import Welcome from "./components/welcome";
 import Settings from './components/settings';
 import Task from './components/task';
 import Check from './components/check'

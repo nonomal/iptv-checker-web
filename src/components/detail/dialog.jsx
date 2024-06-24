@@ -4,7 +4,6 @@ import Dialog from '@mui/material/Dialog';
 import Box from '@mui/material/Box';
 import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
-import Switch from '@mui/material/Switch';
 import LoadingButton from '@mui/lab/LoadingButton';
 import PropTypes from 'prop-types';
 import GetAppIcon from '@mui/icons-material/GetApp';

@@ -43,7 +43,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from '@mui/material/FormLabel';
 import Divider from '@mui/material/Divider';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { writeTextFile, BaseDirectory } from '@tauri-apps/api/fs';
+import { writeTextFile } from '@tauri-apps/api/fs';
 import { save } from '@tauri-apps/api/dialog';
 import { downloadDir } from '@tauri-apps/api/path';
 
@@ -658,7 +658,6 @@ function DownloadDialog(props) {
     const downloadFile = async() => {
         // window.open(url)
         const downloadDirPath = await downloadDir();
-        console.log(downloadDirPath)
         let download_name = downloadDirPath + 'iptv-checker-file-'+new Date().getTime()+".m3u"
         const filePath = await save({
             defaultPath: download_name,

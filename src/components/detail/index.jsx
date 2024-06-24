@@ -11,7 +11,6 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import VideoJS from './../watch/video'
 import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
 import { appWindow } from "@tauri-apps/api/window";
 
 export default function Detail() {

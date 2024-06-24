@@ -89,12 +89,6 @@ export default function Public() {
         <Box style={{
             padding: '0 20px'
         }}>
-            <div style={{
-                fontSize: '40px',
-                padding: '50px 10px',
-                fontWeight: '600'
-            }}>公共订阅源</div>
-            <Divider style={{ marginBottom: '25px' }} />
             <Box style={{ width: '550px' }}>
                 <FormControl sx={{ width: 550 }}>
                     <InputLabel id="demo-simple-select-label">请选择源</InputLabel>

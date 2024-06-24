@@ -112,12 +112,6 @@ export default function Watch() {
         <Box style={{
             padding: '0 20px'
         }}>
-            <div style={{
-                fontSize: '40px',
-                padding: '50px 10px',
-                fontWeight: '600'
-            }}>在线观看</div>
-            <Divider style={{ marginBottom: '25px' }} />
             <Box style={{
                 display: 'flex',
                 alignItems: 'center'

@@ -874,10 +874,6 @@ export default function TaskList(props) {
 
     return (
         <Box style={{padding: '0 20px'}}>
-            <div style={{ fontSize: '40px',
-                padding: '50px 10px',
-                fontWeight: '600' }}>定时检查任务</div>
-            <Divider style={{ marginBottom: '25px' }} />
             {
                 privateHost ? (
             <>

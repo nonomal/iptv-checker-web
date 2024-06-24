@@ -19,6 +19,7 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import _package from './../../../package';
 import { useTranslation, initReactI18next } from "react-i18next";
 import { appWindow } from '@tauri-apps/api/window'
+import Divider from '@mui/material/Divider';
 
 let menuList = [{
     "name": "检测源",
@@ -56,6 +57,13 @@ export default function Layout() {
     const { t } = useTranslation();
     const _mainContext = useContext(MainContext);
     const navigate = useNavigate();
+    const [nowSelectedMenu, setNowSelectedMenu] = useState({
+        "name": "检测源",
+        "ename":"menu source check",
+        "uri": "/check",
+        "icon": "AdjustIcon",
+        'showMod':[0,1]
+    })
 
     const nowVersion = _package.version;
 
@@ -72,6 +80,7 @@ export default function Layout() {
     }, [])
 
     const changePath = (e) => {
+        setNowSelectedMenu(e)
         navigate(e.uri)
     }
 
@@ -135,8 +144,14 @@ export default function Layout() {
                 <div class="titlebar-button" id="titlebar-close">
                     <img src="https://api.iconify.design/mdi:close.svg" alt="close" />
                 </div>
-                </div>
-                <Outlet/>
+            </div>
+            <div style={{
+                fontSize: '40px',
+                padding: '50px 10px',
+                fontWeight: '600'
+            }}>{t(nowSelectedMenu.ename)}</div>
+            <Divider style={{ marginBottom: '25px' }} />
+            <Outlet/>
             </Box>
         </div>
     )

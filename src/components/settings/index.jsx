@@ -168,12 +168,6 @@ export default function Settings() {
                 message={dialogMsg}
                 onClose={handleCloseDialogMsg}
             />
-            <div style={{
-                fontSize: '40px',
-                padding: '50px 10px',
-                fontWeight: '600'
-            }}>{t('System Setting')}</div>
-            <Divider style={{ marginBottom: '25px' }} />
             <Box sx={{
                 display: 'flex',
                 flexDirection: 'column',

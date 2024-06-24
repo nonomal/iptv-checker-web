@@ -94,17 +94,11 @@ export default function Check() {
         <Box style={{
             padding: '0 20px',
         }}>
-            <div style={{
-                fontSize: '40px',
-                padding: '50px 10px',
-                fontWeight: '600'
-            }}>{t("menu source check")}</div>
             <Snackbar open={showError} autoHideDuration={6000} onClose={handleCloseSnackBar}>
                 <Alert onClose={handleCloseSnackBar} severity="error" sx={{ width: '100%' }}>
                     {errorMsg}
                 </Alert>
             </Snackbar>
-            <Divider style={{ marginBottom: '25px' }} />
             <Box style={{ width: '700px' }}>
                 <FormControl variant="standard">
                     <TextField style={{ width: '700px' }}

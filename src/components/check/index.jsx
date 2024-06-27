@@ -5,7 +5,6 @@ import Box from '@mui/material/Box';
 import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
 import LoadingButton from '@mui/lab/LoadingButton';
-import Divider from '@mui/material/Divider';
 import CheckIcon from '@mui/icons-material/Check';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
@@ -103,7 +102,7 @@ export default function Check() {
                 <FormControl variant="standard">
                     <TextField style={{ width: '700px' }}
                         multiline id="standard-multiline-static"
-                        rows={4} value={body} onChange={handleChangeContent} placeholder='请输入要检查的数据' />
+                        rows={4} value={body} onChange={handleChangeContent} placeholder={t('Please enter the data to be checked')} />
                 </FormControl>
                 <Box sx={{
                     display: 'flex',
@@ -117,16 +116,16 @@ export default function Check() {
                         variant="contained"
                         startIcon={<CheckIcon />}
                     >
-                        下一步
+                        {t('下一步')}
                     </LoadingButton>
                 </Box>
             </Box>
             <Box>
-                输入框支持下面几种格式：
+                {t('输入框支持下面几种格式')}：
                 <ul>
-                    <li>支持标准格式的m3u链接，如有多个请用英文逗号做分割符,比如：<i>http://xxxx1.m3u,http://xxxx2.m3u</i></li>
-                    <li>支持类似：<i>频道名称,http://xxxxx.m3u8</i> 格式</li>
-                    <li>支持m3u文件原始内容，类似：<i>#EXTM3U xxxx</i></li>
+                    <li>{t('支持标准格式的m3u链接，如有多个请用英文逗号做分割符,比如')}：<i>http://startv.m3u,http://starmovies.m3u</i></li>
+                    <li>{t('支持类似')}：<i>star movies,http://srtarmovies.m3u8</i></li>
+                    <li>{t('支持m3u文件原始内容，类似')}：<i>#EXTM3U xxxx</i></li>
                 </ul>
             </Box>
         </Box>

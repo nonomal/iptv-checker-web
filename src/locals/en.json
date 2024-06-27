@@ -1,11 +1,31 @@
 {
     "translation": {
       "Welcome to React": "Welcome to use iptv-checker",
-      "System Setting":"System Settings",
-      "menu source check":"Source Check",
-      "menu public source":"Public Source",
-      "menu watch online":"Watch Online",
-      "menu background task":"Background Tasks",
-      "menu system settings":"System Settings"
+      "系统设置":"System Settings",
+      "检测源":"Source Check",
+      "公共订阅源":"Public Source",
+      "在线观看":"Watch Online",
+      "定时检查任务":"Background Tasks",
+      "请输入待检查数据":"Please enter the data to be checked",
+      "新增":"New",
+      "语言":"Language",
+      "删除":"Remove",
+      "示例":"Example",
+      "名称":"name",
+      "自定义网络源":"Custom network source",
+      "检测并发数":"Check concurrency",
+      "检查超时时间（毫秒）":"Check timeout (milliseconds)",
+      "保存":"Save",
+      "刷新列表":"Refresh",
+      "下一步":"Next Step",
+      "输入框支持下面几种格式":"The input box supports the following formats",
+      "支持标准格式的m3u链接，如有多个请用英文逗号做分割符,比如":"Supports standard format m3u links, if there are multiple, please use a comma as the separator, for example",
+      "支持类似":"Support similar",
+      "支持m3u文件原始内容，类似":"Support original content of m3u files, similar to",
+      "请选择源":"Please select the source",
+      "当前源来自github的iptv-org，如您有相关源链接，请至设置中添加":"The current source is from iptv-org on GitHub. If you have relevant source links, please add them in the settings.",
+      "当前设置的【后台检查server域名】为":"The current setting for 【Background check server domain】 is",
+      "后台检查server域名":"Background check server domain",
+      "对不起，您没有设置【后台检查server域名】，请至设置页面操作后再来查看":"I'm sorry, you haven't set the 【Background check server domain】 yet. Please go to the settings page to set it up before checking again."
     }
   }

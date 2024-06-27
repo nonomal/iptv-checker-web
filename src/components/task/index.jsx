@@ -41,11 +41,11 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from '@mui/material/FormLabel';
-import Divider from '@mui/material/Divider';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { writeTextFile } from '@tauri-apps/api/fs';
 import { save } from '@tauri-apps/api/dialog';
 import { downloadDir } from '@tauri-apps/api/path';
+import { useTranslation, initReactI18next } from "react-i18next";
 
 const run_type_list = [{ "value": "EveryDay", "name": "每天" }, { "value": "EveryHour", "name": "每小时" }]
 const output_folder = "static/output/"
@@ -96,6 +96,7 @@ function CustomTabPanel(props) {
 
 
 function TaskForm(props) {
+    const { t } = useTranslation();
     const { onClose, formValue, open, onSave, handleSave, handleDelete } = props;
     const [task, setTask] = React.useState(defaultValue);
     const [filterKeyword, setFilterKeyword] = React.useState('')
@@ -332,13 +333,13 @@ function TaskForm(props) {
         <Dialog onClose={handleClose} open={open}>
             <div style={{ padding: '40px', width: '500px' }}>
                 <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                    <Tabs value={tabIndex} onChange={handleTabChange} aria-label="basic tabs example">
-                        <Tab label="基础配置" />
-                        <Tab label="个性化配置" />
-                        <Tab label="系统配置" />
+                    <Tabs value={tabIndex} onChange={handleTabChange}>
+                        <Tab label={t('基础配置')} />
+                        <Tab label={t('个性化配置')} />
+                        <Tab label={t('系统配置')} />
                         {
                             task.id !== '' ? (
-                                <Tab label="运行状态" />
+                                <Tab label={t('运行状态')} />
                             ) : ''
                         }
                     </Tabs>
@@ -346,11 +347,11 @@ function TaskForm(props) {
                 {
                     task.id !== '' ? (
                         <CustomTabPanel value={tabIndex} index={3}>
-                            <div style={{ padding: "10px 0" }}>任务id：{task.id}</div>
-                            <div style={{ padding: "10px 0" }}>运行状态：{task.task_info.task_status}</div>
-                            <div style={{ padding: "10px 0" }}>创建时间：{task.create_time > 0 ? (new Date(task.create_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
-                            <div style={{ padding: "10px 0" }}>最后一次运行时间：{task.task_info.last_run_time > 0 ? (new Date(task.task_info.last_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
-                            <div style={{ padding: "10px 0" }}>下一次运行时间：{task.task_info.next_run_time > 0 ? (new Date(task.task_info.next_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
+                            <div style={{ padding: "10px 0" }}>{t('任务id')}：{task.id}</div>
+                            <div style={{ padding: "10px 0" }}>{t('运行状态')}：{task.task_info.task_status}</div>
+                            <div style={{ padding: "10px 0" }}>{t('创建时间')}：{task.create_time > 0 ? (new Date(task.create_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
+                            <div style={{ padding: "10px 0" }}>{t('最后一次运行时间')}：{task.task_info.last_run_time > 0 ? (new Date(task.task_info.last_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
+                            <div style={{ padding: "10px 0" }}>{t('下一次运行时间')}：{task.task_info.next_run_time > 0 ? (new Date(task.task_info.next_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''}</div>
                         </CustomTabPanel>
                     ) : ''
                 }
@@ -361,7 +362,7 @@ function TaskForm(props) {
                                 <FormControl fullWidth style={{
                                     padding: "0 0 20px",
                                 }}>
-                                    <p id="demo-simple-select-standard-label">检查文件列表</p>
+                                    <p id="demo-simple-select-standard-label">{t('检查文件列表')}</p>
                                     {
                                         task.original.urls.map((value, index) => (
                                             <div style={{ display: 'flex' }} key={index}>
@@ -380,21 +381,21 @@ function TaskForm(props) {
                             flexDirection: 'row',
                             justifyContent: 'space-between'
                         }}>
-                            <Button variant="outlined" onClick={() => addNewM3uLink()} startIcon={<PublicIcon />}>添加在线链接</Button>
+                            <Button variant="outlined" onClick={() => addNewM3uLink()} startIcon={<PublicIcon />}>{t('添加在线链接')}</Button>
                             <Button variant="contained" component="label" startIcon={<UploadIcon />}>
-                                本地上传m3u文件
+                                {t('本地上传m3u文件')}
                                 <input hidden accept="*" multiple type="file" onChange={handleFileUpload} />
                             </Button>
                         </FormControl>
                         <FormControl fullWidth style={{
                             margin: "0 0 20px",
                         }}>
-                            <InputLabel id="demo-simple-select-standard-label">定时检查时间</InputLabel>
+                            <InputLabel id="demo-simple-select-standard-label">{t('定时检查时间')}</InputLabel>
                             <Select
                                 labelId="demo-simple-select-standard-label"
                                 id="demo-simple-select-standard"
                                 value={task.original.run_type}
-                                label="定时检查时间"
+                                label={t('定时检查时间')}
                                 onChange={handleChangeRunType}
                             >
                                 {
@@ -407,14 +408,14 @@ function TaskForm(props) {
                         <FormControl fullWidth style={{
                             margin: "20px 0 20px",
                         }}>
-                            <InputLabel htmlFor="outlined-adornment-amount">结果文件名</InputLabel>
+                            <InputLabel htmlFor="outlined-adornment-amount">{t('结果文件名')}</InputLabel>
                             <OutlinedInput
                                 style={{ width: '100%' }}
                                 name="resultName"
                                 endAdornment={<InputAdornment position="end">{output_extenion}</InputAdornment>}
                                 startAdornment={<InputAdornment position="start">{output_folder}</InputAdornment>}
                                 aria-describedby="outlined-weight-helper-text"
-                                label="输出文件名"
+                                label={t('结果文件名')}
                                 value={task.original.result_name}
                                 onChange={changeResultName}
                             />
@@ -430,7 +431,7 @@ function TaskForm(props) {
                                 onClick={handleSaveClick}
                                 startIcon={<SaveIcon />}
                             >
-                                保存
+                                {t('保存')}
                             </Button>
                             {
                                 task.id !== '' ? (
@@ -440,7 +441,7 @@ function TaskForm(props) {
                                         color="error"
                                         onClick={handleDeleteClick}
                                         startIcon={<DeleteIcon />}
-                                    >删除</Button>
+                                    >{t('删除')}</Button>
                                 ) : ''
                             }
                         </div>
@@ -452,7 +453,7 @@ function TaskForm(props) {
                             <FormControl fullWidth style={{
                                 padding: "0 0 20px",
                             }}>
-                                <FormLabel id="demo-row-radio-buttons-group-label">只看频道关键词</FormLabel>
+                                <FormLabel id="demo-row-radio-buttons-group-label">{t('只看频道关键词')}</FormLabel>
                                 <Stack direction="row" spacing={1}>
                                     {
                                         task.original.keyword_like !== null && task.original.keyword_like.map((value, i) => (
@@ -473,7 +474,7 @@ function TaskForm(props) {
                             <FormControl fullWidth style={{
                                 padding: "0 0 20px",
                             }}>
-                                <FormLabel id="demo-row-radio-buttons-group-label">不看频道关键词</FormLabel>
+                                <FormLabel id="demo-row-radio-buttons-group-label">{t('不看频道关键词')}</FormLabel>
                                 <Stack direction="row" spacing={1}>
                                     {
                                         task.original.keyword_dislike.map((value, i) => (
@@ -495,7 +496,7 @@ function TaskForm(props) {
                         <Stack direction="row" spacing={1}>
                             <TextField
                                 id="standard-basic"
-                                label="添加关键词"
+                                label={t('添加关键词')}
                                 variant="standard"
                                 value={filterKeyword} onChange={changeFilterKeyword} />
                             <Button
@@ -503,16 +504,16 @@ function TaskForm(props) {
                                 variant="outlined"
                                 onClick={() => addKeyword(1)}
                                 startIcon={<InsertEmoticonIcon />}
-                            >添加只看</Button>
+                            >{t('添加只看')}</Button>
                             <Button
                                 size='small'
                                 variant="outlined"
                                 onClick={() => addKeyword(2)}
-                                startIcon={<MoodBadIcon />}>添加不看</Button>
+                                startIcon={<MoodBadIcon />}>{t('添加不看')}</Button>
                         </Stack>
                     </FormControl>
                     <FormControl>
-                        <FormLabel id="demo-row-radio-buttons-group-label">是否需要排序</FormLabel>
+                        <FormLabel id="demo-row-radio-buttons-group-label">{t('是否需要排序')}</FormLabel>
                         <RadioGroup
                             row
                             aria-labelledby="demo-row-radio-buttons-group-label"
@@ -520,8 +521,8 @@ function TaskForm(props) {
                             value={task.original.sort}
                             onChange={handleChangeSortValue}
                         >
-                            <FormControlLabel value="false" control={<Radio />} label="否" />
-                            <FormControlLabel value="true" control={<Radio />} label="是" />
+                            <FormControlLabel value="false" control={<Radio />} label={t('否')} />
+                            <FormControlLabel value="true" control={<Radio />} label={t('是')} />
                         </RadioGroup>
                     </FormControl>
                 </CustomTabPanel>
@@ -529,19 +530,19 @@ function TaskForm(props) {
                     <FormControl fullWidth style={{
                         margin: "20px 0 20px",
                     }}>
-                        <FormLabel id="demo-row-radio-buttons-group-label">http超时(毫秒ms)</FormLabel>
+                        <FormLabel id="demo-row-radio-buttons-group-label">{t('http超时(毫秒ms)')}</FormLabel>
                         <TextField id="standard-basic" variant="standard" value={task.original.http_timeout} onChange={changeHttpTimeout} />
                     </FormControl>
                     <FormControl fullWidth style={{
                         margin: "20px 0 20px",
                     }}>
-                        <FormLabel id="demo-row-radio-buttons-group-label">检查超时(毫秒ms)</FormLabel>
+                        <FormLabel id="demo-row-radio-buttons-group-label">{t('检查超时(毫秒ms)')}</FormLabel>
                         <TextField id="standard-basic" variant="standard" value={task.original.check_timeout} onChange={changeCheckTimeout} />
                     </FormControl>
                     <FormControl fullWidth style={{
                         margin: "20px 0 20px",
                     }}>
-                        <FormLabel id="demo-row-radio-buttons-group-label">检查并发数</FormLabel>
+                        <FormLabel id="demo-row-radio-buttons-group-label">{t('检查并发数')}</FormLabel>
                         <TextField id="standard-basic" variant="standard" value={task.original.concurrent} onChange={changeConcurrent} />
                     </FormControl>
                 </CustomTabPanel>
@@ -551,6 +552,7 @@ function TaskForm(props) {
 }
 
 function Row(props) {
+    const { t } = useTranslation();
     const { row, clickTask, doTaskRightNow, showDownloadDialog } = props;
     const [open, setOpen] = React.useState(false);
 
@@ -576,7 +578,7 @@ function Row(props) {
                     {
                         row.task_info.next_run_time > 0 && row.task_info.next_run_time - new Date().getTime() / 1000 >= 180
                             && row.task_info.last_run_time > 0 && new Date().getTime() / 1000 - row.task_info.last_run_time >= 180 ? (
-                            <Button onClick={() => handleTaskRightNow(row.id)}>立即执行</Button>
+                            <Button onClick={() => handleTaskRightNow(row.id)}>{t('立即执行')}</Button>
                         ) : ''
                     }
                 </TableCell>
@@ -591,10 +593,10 @@ function Row(props) {
                     </Tooltip>
                 </TableCell>
                 <TableCell align="right">
-                    <div>创建时间：{row.create_time > 0 ? (new Date(row.create_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''} </div>
-                    <div>最后一次运行时间：{row.task_info.last_run_time > 0 ? (new Date(row.task_info.last_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''} </div>
-                    <div>下一次运行时间：{row.task_info.next_run_time > 0 ? (new Date(row.task_info.next_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''} </div>
-                    <div>运行类型：{row.task_info.run_type} </div>
+                    <div>{t('创建时间')}：{row.create_time > 0 ? (new Date(row.create_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''} </div>
+                    <div>{t('最后一次运行时间')}：{row.task_info.last_run_time > 0 ? (new Date(row.task_info.last_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''} </div>
+                    <div>{t('下一次运行时间')}：{row.task_info.next_run_time > 0 ? (new Date(row.task_info.next_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''} </div>
+                    <div>{t('运行类型')}：{row.task_info.run_type} </div>
                 </TableCell>
             </TableRow>
             <TableRow>
@@ -613,7 +615,7 @@ function Row(props) {
                                     row.original.keyword_dislike !== null ? (
                                         <TableRow key="dislike-row">
                                             <TableCell component="th" scope="row">
-                                                不喜欢关键词：{row.original.keyword_dislike?row.original.keyword_dislike.join("、"):''}
+                                                {t('不喜欢关键词')}：{row.original.keyword_dislike?row.original.keyword_dislike.join("、"):''}
                                             </TableCell>
                                         </TableRow>
                                     ) : ''
@@ -622,7 +624,7 @@ function Row(props) {
                                     row.original.keyword_like !== null ? (
                                         <TableRow key="like-row">
                                             <TableCell component="th" scope="row">
-                                                喜欢关键词：{row.original.keyword_like?row.original.keyword_like.join("、"):''}
+                                                {t('喜欢关键词')}：{row.original.keyword_like?row.original.keyword_like.join("、"):''}
                                             </TableCell>
                                         </TableRow>
                                     ) : ''
@@ -637,6 +639,7 @@ function Row(props) {
 }
 
 function DownloadDialog(props) {
+    const { t } = useTranslation();
     const { onClose, formValue, open } = props;
 
     const [showData, setShowData] = React.useState([])
@@ -686,11 +689,11 @@ function DownloadDialog(props) {
                         zIndex: 9,
                         width: '560px',
                     }}>
-                        <div>订阅链接：<b>{url}</b></div>
+                        <div>{t('订阅链接')}：<b>{url}</b></div>
                         {
                             showData.length > 0 ? (
                                 <div>
-                                    <Button variant="text" onClick={() => downloadFile(formValue.url)}>点击下载</Button>
+                                    <Button variant="text" onClick={() => downloadFile(formValue.url)}>{t('点击下载')}</Button>
                                 </div>
                             ) : ''
                         }
@@ -711,7 +714,7 @@ function DownloadDialog(props) {
                             </div>
                         ) : (
                             <div style={{ padding: "60px 0", position: 'relative' }}>
-                                <div>暂未生成</div>
+                                <div>{t('点击下载')}</div>
                             </div>
                         )
                     }
@@ -725,7 +728,7 @@ export default function TaskList(props) {
     const _mainContext = useContext(MainContext);
 
     const privateHostRef = useRef("")
-
+    const { t } = useTranslation();
     useEffect(() => {
         let config = _mainContext.settings
         if(config !== null) {
@@ -746,10 +749,6 @@ export default function TaskList(props) {
     const [openDownloadBody, setOpenDownloadBody] = React.useState(false)
     const [downloadBody, setDownloadBody] = React.useState({ "content": "", "url": "" })
     const [privateHost, setPrivateHost] = React.useState('')
-
-    // useEffect(() => {
-    //     get_task_list()
-    // }, [privateHost]);
 
     const handleClickOpen = (value) => {
         setFormValue(value)
@@ -832,7 +831,7 @@ export default function TaskList(props) {
             setTaskList(res.data.list)
         }).catch(e => {
             setTaskList([])
-            handleOpenAlertBar("获取任务失败，请检查服务是否正常启动")
+            handleOpenAlertBar(t('获取任务失败，请检查服务是否正常启动'))
         })
     }
 
@@ -850,7 +849,7 @@ export default function TaskList(props) {
         axios.get(getHost()+"/tasks/run?task_id=" + id).then(res => {
             get_task_list()
         }).catch(e => {
-            handleOpenAlertBar("操作失败")
+            handleOpenAlertBar(t('操作失败'))
         })
     }
 
@@ -859,7 +858,7 @@ export default function TaskList(props) {
             setOpenDownloadBody(true)
             setDownloadBody({ 'content': res.data.content, "url": res.data.url })
         }).catch(e => {
-            handleOpenAlertBar("操作失败")
+            handleOpenAlertBar(t('操作失败'))
         })
     }
 
@@ -883,12 +882,12 @@ export default function TaskList(props) {
                 startIcon={<AddIcon />} 
                 onClick={() => handleClickOpen(null)}
                 style={{marginRight: '10px'}}
-                >新增</Button>
+                >{t('新增')}</Button>
                 <Button 
                 variant="outlined" 
                 startIcon={<RefreshIcon />} 
                 onClick={() => refreshList()}
-                >刷新列表</Button>
+                >{t('刷新列表')}</Button>
             </Box>
             <Snackbar
                 open={openAlertBar}
@@ -908,7 +907,7 @@ export default function TaskList(props) {
                 open={openDownloadBody}
                 onClose={() => handleDownloadClose(false)}
             />
-            <p>当前设置的【后台检查server域名】为：{privateHost}</p>
+            <p>{t('当前设置的【后台检查server域名】为')}：{privateHost}</p>
             <Paper sx={{ width: '1024px', overflow: 'hidden' }}>
                 <TableContainer>
                 <Table aria-label="simple table">
@@ -938,7 +937,7 @@ export default function TaskList(props) {
             </Paper>
             </>
             ):(
-                <Box>对不起，您没有设置【后台检查server域名】，请至设置页面操作后再来查看</Box>
+                <Box>{t('对不起，您没有设置【后台检查server域名】，请至设置页面操作后再来查看')}</Box>
             )}
         </Box>
     );

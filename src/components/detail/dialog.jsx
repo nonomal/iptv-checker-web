@@ -19,6 +19,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import { useTranslation, initReactI18next } from "react-i18next";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -41,6 +42,7 @@ function TabPanel(props) {
 }
 
 export default function SimpleDialog(props) {
+  const { t } = useTranslation();
   const _mainContext = useContext(MainContext);
 
   //mod == 1 下载界面 2预览原始m3u信息
@@ -61,15 +63,15 @@ export default function SimpleDialog(props) {
     setGroupTab(0)
     setSelectedGroups('')
     if (mod === 1) {
-      setShowTextAreaLable('您所选择的m3u信息')
+      setShowTextAreaLable(t('您所选择的m3u信息'))
     } else if (mod === 2) {
-      setShowTextAreaLable('原始数据')
+      setShowTextAreaLable(t('原始数据'))
     } else if (mod === 3) {
-      setShowTextAreaLable('设置')
+      setShowTextAreaLable(t('设置'))
     } else if (mod === 4) {
-      setShowTextAreaLable('排序(数据较多时,可能影响排序列表性能,建议分批操作)')
+      setShowTextAreaLable(t('排序(数据较多时,可能影响排序列表性能,建议分批操作)'))
     } else if (mod === 5) {
-      setShowTextAreaLable('更改分组')
+      setShowTextAreaLable(t('更改分组'))
     }
   }, [mod])
 
@@ -183,7 +185,7 @@ export default function SimpleDialog(props) {
                   style={{ marginRight: '10px' }}
                   startIcon={<SkipNextIcon />}
                 >
-                  继续(下一步)
+                  {t('下一步')}
                 </LoadingButton>
               </FormControl>
             </Box>
@@ -205,7 +207,7 @@ export default function SimpleDialog(props) {
               style={{ marginRight: '10px' }}
               startIcon={<SkipPreviousIcon />}
             >
-              上一步
+              {t('上一步')}
             </LoadingButton>
             <LoadingButton
               size="small"
@@ -214,7 +216,7 @@ export default function SimpleDialog(props) {
               style={{ marginRight: '10px' }}
               startIcon={<GetAppIcon />}
             >
-              下载m3u文件
+              {t('下载m3u文件')}
             </LoadingButton>
             <LoadingButton
               size="small"
@@ -223,7 +225,7 @@ export default function SimpleDialog(props) {
               style={{ marginRight: '10px' }}
               startIcon={<InsertDriveFileIcon />}
             >
-              下载csv文件
+              {t('下载csv文件')}
             </LoadingButton>
             <LoadingButton
               size="small"
@@ -231,7 +233,7 @@ export default function SimpleDialog(props) {
               variant="contained"
               startIcon={<AutorenewIcon />}
             >
-              再次处理
+              {t('再次处理')}
             </LoadingButton>
           </FormControl>
         ) : ''
@@ -241,18 +243,18 @@ export default function SimpleDialog(props) {
           <Box sx={{ width: 550, margin: '10px' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
               <Tabs value={groupTab} onChange={handleChangeGroupTab} aria-label="basic tabs example">
-                <Tab label="已有分组" />
-                <Tab label="新增分组" />
+                <Tab label={t('已有分组')} />
+                <Tab label={t('新增分组')} />
               </Tabs>
             </Box>
             <TabPanel value={groupTab} index={0}>
               <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">更换分组</InputLabel>
+                <InputLabel id="demo-simple-select-label">{t('更换分组')}</InputLabel>
                 <Select
                   labelId="demo-simple-select-label"
                   id="demo-simple-select"
                   value={selectedGroups}
-                  label="更换分组"
+                  label={t('更换分组')}
                   onChange={handleChangeGroup}
                 >
                   {_mainContext.uGroups.map((value, index) => (
@@ -263,7 +265,7 @@ export default function SimpleDialog(props) {
             </TabPanel>
             <TabPanel value={groupTab} index={1}>
               <FormControl fullWidth>
-                <TextField id="standard-basic" label="输入新分组名称" value={customGroupName}
+                <TextField id="standard-basic" label={t('输入新分组名称')} value={customGroupName}
                   variant="standard" onChange={changeCustomGroupName} />
               </FormControl>
             </TabPanel>
@@ -272,7 +274,7 @@ export default function SimpleDialog(props) {
               justifyContent: 'flex-end',
               marginTop: '5px'
             }}>
-              <Button variant="outlined" onClick={doTransferGroup}>{groupTab === 0? '更改':'新增'}</Button>
+              <Button variant="outlined" onClick={doTransferGroup}>{groupTab === 0? t('更改'):t('新增')}</Button>
             </Box>
           </Box>
         ) : ''

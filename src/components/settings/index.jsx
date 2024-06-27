@@ -5,7 +5,6 @@ import Box from '@mui/material/Box';
 import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
 import LoadingButton from '@mui/lab/LoadingButton';
-import Divider from '@mui/material/Divider';
 import FormLabel from '@mui/material/FormLabel';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -19,7 +18,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 
 function AddSourceDialog(props) {
-
+    const { t } = useTranslation();
     const { onClose, open, saveData } = props;
 
     const [body, setBody] = useState('')
@@ -38,7 +37,7 @@ function AddSourceDialog(props) {
 
     return (
         <Dialog onClose={handleClose} open={open}>
-            <DialogTitle>自定义源添加</DialogTitle>
+            <DialogTitle>{t('自定义网络源')}</DialogTitle>
             <div style={{
                 padding: '20px',
                 display: 'flex',
@@ -59,12 +58,12 @@ function AddSourceDialog(props) {
                         onClick={doSave}
                         variant="outlined"
                     >
-                        保存
+                        {t('保存')}
                     </LoadingButton>
                 </FormControl>
-                <Box>格式：名称,https://xxxx.m3u + 换行，其中名称需要唯一，如下所示</Box>
-                <Box>名称1,https://xxxx.m3u</Box>
-                <Box>名称2,https://xxxx.m3u</Box>
+                <Box>{t('格式：名称,https://xxxx.m3u + 换行，其中名称需要唯一，如下所示')}</Box>
+                <Box>star movies,http://srtarmovies.m3u8</Box>
+                <Box>star plus,https://plus.m3u</Box>
             </div>
         </Dialog>
     );
@@ -120,7 +119,7 @@ export default function Settings() {
         })
         _mainContext.changeLanguage(language)
         setOpenDialog(true)
-        setDialogMsg('保存成功')
+        setDialogMsg(t('保存成功'))
     }
 
     const handleShowAddSourceDialog = (val) => {
@@ -176,11 +175,11 @@ export default function Settings() {
             }}>
 
                 <FormControl  sx={{ marginBottom: '20px' }}>
-                    <InputLabel id="demo-row-radio-buttons-group-label">选择语言</InputLabel>
+                    <InputLabel id="demo-row-radio-buttons-group-label">{t('语言')}</InputLabel>
                     <Select
                         name="language"
                         value={language}
-                        label="选择语言"
+                        label={t('语言')}
                         onChange={handleChangeConfigSettings}
                     >
                         {
@@ -191,7 +190,7 @@ export default function Settings() {
                     </Select>
                 </FormControl>
                 <FormControl sx={{ marginBottom: '20px' }}>
-                    <FormLabel id="demo-row-radio-buttons-group-label">检测并发数</FormLabel>
+                    <FormLabel id="demo-row-radio-buttons-group-label">{t('检测并发数')}</FormLabel>
                     <TextField
                         name="concurrent"
                         value={concurrent}
@@ -199,7 +198,7 @@ export default function Settings() {
                     />
                 </FormControl>
                 <FormControl sx={{ marginBottom: '20px' }}>
-                    <FormLabel id="demo-row-radio-buttons-group-label">检查超时时间（毫秒）</FormLabel>
+                    <FormLabel id="demo-row-radio-buttons-group-label">{t('检查超时时间（毫秒）')}</FormLabel>
                     <TextField
                         name="httpRequestTimeout"
                         value={httpRequestTimeout}
@@ -207,7 +206,7 @@ export default function Settings() {
                     />
                 </FormControl>
                 <FormControl sx={{ marginBottom: '20px' }}>
-                    <FormLabel id="demo-row-radio-buttons-group-label">后台检查server域名,示例：http://127.0.0.1:8089</FormLabel>
+                    <FormLabel id="demo-row-radio-buttons-group-label">{t('后台检查server域名')},{t('示例')}：http://127.0.0.1:8089</FormLabel>
                     <TextField
                         name="privateHost"
                         value={privateHost}
@@ -216,8 +215,8 @@ export default function Settings() {
                 </FormControl>
                 <FormControl sx={{ marginBottom: '20px' }}>
                     <FormLabel id="demo-row-radio-buttons-group-label">
-                        自定义网络源
-                        <IconButton aria-label="添加" onClick={() => handleShowAddSourceDialog(true)}>
+                        {t('自定义网络源')}
+                        <IconButton aria-label={t('新增')} onClick={() => handleShowAddSourceDialog(true)}>
                             <AddIcon />
                         </IconButton>
                     </FormLabel>
@@ -225,7 +224,7 @@ export default function Settings() {
                         {
                             customLink.map((value, index) => (
                                 <div key={index}>
-                                    <IconButton aria-label="删除" onClick={() => delCustomLink(index)}>
+                                    <IconButton aria-label={t('删除')} onClick={() => delCustomLink(index)}>
                                         <DeleteIcon />
                                     </IconButton>- {value.name} - {value.url}
                                 </div>
@@ -237,7 +236,7 @@ export default function Settings() {
                     onClick={doSaveConfigSettings}
                     variant="outlined"
                 >
-                    保存
+                    {t('保存')}
                 </LoadingButton>
             </Box>
         </Box>

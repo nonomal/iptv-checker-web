@@ -80,7 +80,7 @@ class MuiVirtualizedTable extends React.PureComponent {
     }
 
     cellRenderer = ({ cellData, columnIndex }) => {
-        const { rowHeight, onRowClick, selectRow, delRow, watchRow, originalData, showOriginalUrl, columns, seeDetail, handleMod, nowMod } = this.props;
+        const { t, rowHeight, onRowClick, selectRow, delRow, watchRow, originalData, showOriginalUrl, columns, seeDetail, handleMod, nowMod } = this.props;
         return (
             <TableCell
                 component="div"
@@ -122,7 +122,7 @@ class MuiVirtualizedTable extends React.PureComponent {
                                 } */}
                                 {
                                     handleMod !== 1 ? (
-                                        <Tooltip title="观看">
+                                        <Tooltip title={t('观看')}>
                                             <IconButton size="small" onClick={() => watchRow(originalData[this.getObjectIndexIndex(cellData)].url)}>
                                                 <LiveTvIcon fontSize="small" sx={{ color: green[400] }} />
                                             </IconButton>
@@ -140,7 +140,7 @@ class MuiVirtualizedTable extends React.PureComponent {
                         <Box>
                             {
                                 originalData[this.getObjectIndexIndex(cellData)].status === 0 ? (
-                                    <Tooltip title="未检查">
+                                    <Tooltip title={t('未检查')}>
                                         <Avatar sx={{ width: 24, height: 24 }}>
                                             <HorizontalRuleIcon />
                                         </Avatar>
@@ -155,7 +155,7 @@ class MuiVirtualizedTable extends React.PureComponent {
                                                 fontWeight: "bold",
                                             }}>{originalData[this.getObjectIndexIndex(cellData)].delay}ms</div>
                                         ):(
-                                            <Tooltip title="有效">
+                                            <Tooltip title={t('有效')}>
                                                 <Avatar sx={{ bgcolor: green[500], width: 24, height: 24 }}>
                                                     <TagFacesIcon />
                                                 </Avatar>
@@ -166,7 +166,7 @@ class MuiVirtualizedTable extends React.PureComponent {
                             }
                             {
                                 originalData[this.getObjectIndexIndex(cellData)].status === 2 ? (
-                                    <Tooltip title="无效">
+                                    <Tooltip title={t('无效')}>
                                         <Avatar sx={{ bgcolor: pink[500], width: 24, height: 24 }}>
                                             <SentimentVeryDissatisfiedIcon />
                                         </Avatar>

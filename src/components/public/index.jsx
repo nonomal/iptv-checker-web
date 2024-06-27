@@ -12,9 +12,11 @@ import CheckIcon from '@mui/icons-material/Check';
 import utils from './../../utils/common'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
+import { useTranslation, initReactI18next } from "react-i18next";
 
 export default function Public() {
 
+    const { t } = useTranslation();
     const _mainContext = useContext(MainContext);
     const navigate = useNavigate();
     const [selectedUrl, setSelectedUrl] = useState([])
@@ -23,7 +25,6 @@ export default function Public() {
 
     useEffect(() => {
         let config = _mainContext.settings
-        console.log("--config11", config)
         if(config !== null) {
             fetchCommonLink(config.customLink)
         }
@@ -75,7 +76,7 @@ export default function Public() {
         try {
             let bodies = await parseOnlineData(selectedUrl);
             if (bodies.length === 0) {
-                throw new Error('链接为空')
+                throw new Error(t('链接为空'))
             }
             _mainContext.changeOriginalM3uBodies(bodies)
             navigate("/detail")
@@ -91,12 +92,12 @@ export default function Public() {
         }}>
             <Box style={{ width: '550px' }}>
                 <FormControl sx={{ width: 550 }}>
-                    <InputLabel id="demo-simple-select-label">请选择源</InputLabel>
+                    <InputLabel id="demo-simple-select-label">{t('请选择源')}</InputLabel>
                     <Select
                         labelId="demo-simple-select-label"
                         id="demo-simple-select"
                         value={selectedUrl}
-                        label="请选择源"
+                        label={t('请选择源')}
                         onChange={handleSelectedCountry}
                     >
                         {
@@ -118,11 +119,11 @@ export default function Public() {
                         variant="contained"
                         startIcon={<CheckIcon />}
                     >
-                        下一步
+                        {t('下一步')}
                     </LoadingButton>
                 </Box>
             </Box>
-            <Box>当前源来自github的iptv-org，如您有相关源链接，请至设置中添加</Box>
+            <Box>{t('当前源来自github的iptv-org，如您有相关源链接，请至设置中添加')}</Box>
         </Box>
     )
 }

@@ -23,34 +23,34 @@ import Divider from '@mui/material/Divider';
 
 let menuList = [{
     "name": "检测源",
-    "ename":"menu source check",
     "uri": "/check",
     "icon": "AdjustIcon",
-    'showMod':[0,1]
+    'showMod':[0,1],
+    'showHeader': true
 }, {
     "name": "公共订阅源",
     "uri": "/public",
-    "ename":"menu public source",
     "icon": "PublicIcon",
-    'showMod':[0,1]
+    'showMod':[0,1],
+    'showHeader': true
 },{
     "name": "在线观看",
     "uri": "/watch",
-    "ename":"menu watch online",
     "icon": "RemoveRedEyeIcon",
-    'showMod':[1]
+    'showMod':[1],
+    'showHeader': true
 }, {
     "name": "定时检查任务",
     "uri": "/task",
-    "ename":"menu background task",
     "icon": "CloudQueueIcon",
-    'showMod':[0,1]
+    'showMod':[0,1],
+    'showHeader': true
 }, {
     "name": "系统设置",
     "uri": "/settings",
-    "ename":"menu system settings",
     "icon": "SettingsIcon",
-    'showMod':[0,1]
+    'showMod':[0,1],
+    'showHeader': true
 }]
 
 export default function Layout() {
@@ -120,7 +120,7 @@ export default function Layout() {
                                                 value.icon === 'RemoveRedEyeIcon' ? <RemoveRedEyeIcon /> : ''
                                             }
                                         </ListItemIcon>
-                                        <ListItemText primary={t(value.ename)} />
+                                        <ListItemText primary={t(value.name)} />
                                     </ListItemButton>
                                 </ListItem>
                             ):''
@@ -145,12 +145,18 @@ export default function Layout() {
                     <img src="https://api.iconify.design/mdi:close.svg" alt="close" />
                 </div>
             </div>
-            <div style={{
-                fontSize: '40px',
-                padding: '50px 10px',
-                fontWeight: '600'
-            }}>{t(nowSelectedMenu.ename)}</div>
-            <Divider style={{ marginBottom: '25px' }} />
+            {
+                nowSelectedMenu.showHeader ? (
+                    <>
+                        <div style={{
+                            fontSize: '40px',
+                            padding: '50px 10px',
+                            fontWeight: '600'
+                        }}>{t(nowSelectedMenu.name)}</div>
+                        <Divider style={{ marginBottom: '25px' }} />
+                    </>
+                ):''
+            }
             <Outlet/>
             </Box>
         </div>

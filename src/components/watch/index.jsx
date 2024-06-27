@@ -11,9 +11,10 @@ import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import { useLocation } from 'react-router-dom';
 import VideoJS from './video'
-import Divider from '@mui/material/Divider';
+import { useTranslation, initReactI18next } from "react-i18next";
 
 export default function Watch() {
+    const { t } = useTranslation();
     const _mainContext = useContext(MainContext);
     const location = useLocation();
     const [videoJsOptions, setVideoJsOptions] = useState(null)
@@ -117,7 +118,7 @@ export default function Watch() {
                 alignItems: 'center'
             }}>
                 <FormControl sx={{ width: 550, margin: '10px' }}>
-                    <TextField sx={{ fontSize: '11px' }} label='请输入m3u8播放地址' size="small" id="standard-multiline-static" value={m3u8Link} onChange={changeM3u8Link} />
+                    <TextField sx={{ fontSize: '11px' }} label={t('请输入m3u8播放地址')} size="small" id="standard-multiline-static" value={m3u8Link} onChange={changeM3u8Link} />
                 </FormControl>
                 {
                     m3u8Link !== '' && !isPlaying ? (
@@ -127,7 +128,7 @@ export default function Watch() {
                             variant="contained"
                             startIcon={<PlayCircleOutlineIcon />}
                         >
-                            播放
+                            {t('播放')}
                         </LoadingButton>
                     ) : ''}
                 {
@@ -138,7 +139,7 @@ export default function Watch() {
                             variant="contained"
                             startIcon={<StopCircleIcon />}
                         >
-                            停止
+                            {t('停止')}
                         </LoadingButton>
                     ) : ''
                 }
@@ -151,7 +152,7 @@ export default function Watch() {
                             onClick={addNewHttpHeader}
                             variant="contained"
                         >
-                            + http Header
+                            + {t('请求头')}
                         </Button>
                     </Box>
                     {

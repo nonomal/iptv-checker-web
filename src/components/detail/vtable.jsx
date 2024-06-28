@@ -58,7 +58,7 @@ export const styles = ({ theme }) => ({
 class MuiVirtualizedTable extends React.PureComponent {
     static defaultProps = {
         headerHeight: 48,
-        rowHeight: 60,
+        rowHeight: 80,
     };
 
     getRowClassName = ({ index }) => {
@@ -130,7 +130,7 @@ class MuiVirtualizedTable extends React.PureComponent {
                                     ) : ''
                                 }
                             </div>
-                            <div style={{ fontSize: '12px', color: '#7a7a7a' }}><i>{originalData[this.getObjectIndexIndex(cellData)].url}</i></div>
+                            <div style={{ fontSize: '12px', color: '#7a7a7a',overflow:'hidden' }}><i>{originalData[this.getObjectIndexIndex(cellData)].url}</i></div>
                             <div style={{ fontSize: '12px', color: '#7a7a7a' }}>{originalData[this.getObjectIndexIndex(cellData)].video ? "" + originalData[this.getObjectIndexIndex(cellData)].video.width + "x" + originalData[this.getObjectIndexIndex(cellData)].video.height + "-" + originalData[this.getObjectIndexIndex(cellData)].video.codec + "" : ''}{'-'}{originalData[this.getObjectIndexIndex(cellData)].audio ? "" + originalData[this.getObjectIndexIndex(cellData)].audio.codec + "-" + originalData[this.getObjectIndexIndex(cellData)].audio.channels + " audio channels" : ''}</div>
                         </div>
                     ) : ''

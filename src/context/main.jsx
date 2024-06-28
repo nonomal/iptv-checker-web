@@ -20,7 +20,7 @@ export const MainContextProvider = function ({ children }) {
     const [checkData, setCheckData] = useState([])//待检查数据列表
     const [videoResolution, setVideoResolution] = useState([])//视频分辨率筛选
     const [needFastSource, setNeedFastSource] = useState(false)// 是否选择最快的源, false否， true是
-    const [nowMod, setNowMod] = useState(1);// 当前运行模式 1客户端模式 0服务端模式
+    const [nowMod, setNowMod] = useState(1);// 当前运行模式 0服务端模式 1客户端模式
     const [nowLanguage, setNowLanguage] = useState('en')
     const [languageList, setLanguageList] = useState([{
         'code':'en',

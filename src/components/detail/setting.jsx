@@ -201,10 +201,10 @@ export default function Setting(props) {
     return (
         <Box sx={{
             position: 'fixed',
-            width: 'calc(100%-250px)',
+            width: 'calc(100% - 290px)',
             borderBottom: '1px solid #eee',
             top: 0,
-            left: 270,
+            left: 290,
             zIndex: 999,
             padding: '8px',
             boxShadow:"1px 1px 4px pink"
@@ -284,7 +284,7 @@ export default function Setting(props) {
                                         {t('有效链接')}
                                     </LoadingButton>
                                     {
-                                        _mainContext.nowMod !== 1 ? (
+                                        _mainContext.nowMod === 0 ? (
                                             <FormControlLabel 
                                             size="small"
                                             control={<Checkbox size="small" checked={_mainContext.needFastSource} onChange={handleNeedFastSource} />} 

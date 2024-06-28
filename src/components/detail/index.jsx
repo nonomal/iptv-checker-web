@@ -102,7 +102,7 @@ export default function Detail() {
       e.returnValue = returnValue
     })
     if(_mainContext.showM3uBody.length === 0) {
-      navigate("/")
+      navigate("/check")
     }
   }, [])
 

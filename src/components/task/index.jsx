@@ -714,7 +714,7 @@ function DownloadDialog(props) {
                             </div>
                         ) : (
                             <div style={{ padding: "60px 0", position: 'relative' }}>
-                                <div>{t('点击下载')}</div>
+                                <div>{t('暂未生成')}</div>
                             </div>
                         )
                     }

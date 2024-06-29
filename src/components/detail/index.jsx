@@ -172,8 +172,8 @@ export default function Detail() {
   return (
     <Box style={{padding: '0 20px'}}>
       <Setting setSelectedArr={setSelectedArr} selectedArr={selectedArr}></Setting>
-      <Dialog onClose={handleWatchClose} open={showWatch}>
-        <div style={{ width: '500px'}}>
+      <Dialog scroll="body" fullWidth onClose={handleWatchClose} open={showWatch}>
+        <div>
           <VideoJS options={videoJsOptions} onReady={handlePlayerReady} headers={httpHeaders} />
         </div>
       </Dialog>

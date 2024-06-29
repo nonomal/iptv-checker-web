@@ -12,6 +12,7 @@ import utils from './../../utils/common'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
 import { useTranslation, initReactI18next } from "react-i18next";
+import { appWindow } from '@tauri-apps/api/window'
 
 const lastHomeUserInput = 'lastHomeUserInput'
 
@@ -30,6 +31,7 @@ export default function Check() {
     const [showError, setShowError] = useState(false)
 
     useEffect(()=> {
+        console.log(appWindow)
         _mainContext.clearDetailData()
     }, [])
 

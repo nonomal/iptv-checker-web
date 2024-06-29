@@ -80,30 +80,37 @@ export default function SimpleDialog(props) {
   };
 
   const doDownload = () => {
-    var a = document.createElement('a')
-    var blob = new Blob([_mainContext.exportDataStr])
-    var url = window.URL.createObjectURL(blob)
-    a.href = url
-    a.download = 'iptv-checker-' + (new Date()).getTime() + ".m3u"
-    a.click()
+    if(_mainContext.nowMod === 1) {
+      _mainContext.clientSaveFile(_mainContext.exportDataStr, 'm3u')
+    }else{
+      var a = document.createElement('a')
+      var blob = new Blob([_mainContext.exportDataStr])
+      var url = window.URL.createObjectURL(blob)
+      a.href = url
+      a.download = 'iptv-checker-' + (new Date()).getTime() + ".m3u"
+      a.click()
+    }
   }
 
   const doCsvDownload = () => {
     let csvArr = _mainContext.strToCsv(_mainContext.exportDataStr)
-    // 将数据行转换为 CSV 字符串
-    const csvContent = csvArr.map(e => e.join(",")).join("\n");
-
-    // 创建下载链接并将 CSV 文件下载到本地
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", "iptv-checker-" + (new Date()).getTime() + ".csv");
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    onClose();
+      // 将数据行转换为 CSV 字符串
+      const csvContent = csvArr.map(e => e.join(",")).join("\n");
+    if(_mainContext.nowMod === 1) {
+      _mainContext.clientSaveFile(csvContent, 'csv')
+    }else{
+      // 创建下载链接并将 CSV 文件下载到本地
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "iptv-checker-" + (new Date()).getTime() + ".csv");
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      onClose();
+    }
   }
 
   const doDoAgain = () => {
@@ -159,12 +166,12 @@ export default function SimpleDialog(props) {
 
   return (
     <Dialog onClose={handleClose} open={open}>
-      <Box style={{ minWidth: mod !== 3 ? '600px' : '', 'paddingTop': '10px', 'overflow':'hidden' }}>
+      <Box style={{ minWidth: mod !== 3 ? '800px' : '', 'paddingTop': '10px', 'overflow':'hidden' }}>
         <span style={{ paddingLeft: '10px'}}>{showTextAreaLable}</span>
       </Box>
       {mod === 1 || mod === 2 ? (
         <FormControl sx={{ width: 550, margin: '10px' }}>
-          <TextField multiline sx={{ fontSize: '11px' }} label={showTextAreaLable} size="small" id="standard-multiline-static" rows={4} value={_mainContext.exportDataStr} />
+          <TextField multiline sx={{ fontSize: '11px' }} size="small" id="standard-multiline-static" rows={4} value={_mainContext.exportDataStr} />
         </FormControl>
       ) : ''}
       {

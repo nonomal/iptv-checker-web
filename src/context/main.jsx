@@ -5,7 +5,11 @@ import ParseM3u from '../utils/utils'
 import { invoke } from '@tauri-apps/api'
 import utils from '../utils/common'
 import i18n from "i18next";
+import { appWindow } from '@tauri-apps/api/window'
 import { overrideGlobalXHR } from 'tauri-xhr'
+import { writeTextFile } from '@tauri-apps/api/fs';
+import { save } from '@tauri-apps/api/dialog';
+import { downloadDir } from '@tauri-apps/api/path';
 
 export const MainContextProvider = function ({ children }) {
     const headerHeight = 145
@@ -22,6 +26,7 @@ export const MainContextProvider = function ({ children }) {
     const [needFastSource, setNeedFastSource] = useState(false)// 是否选择最快的源, false否， true是
     const [nowMod, setNowMod] = useState(1);// 当前运行模式 0服务端模式 1客户端模式
     const [nowLanguage, setNowLanguage] = useState('en')
+    const [nowWindow, setNowWindow] = useState({width: 0, height: 0})
     const [languageList, setLanguageList] = useState([{
         'code':'en',
         "name":"English"
@@ -53,15 +58,45 @@ export const MainContextProvider = function ({ children }) {
     }
 
     const changeLanguage  = (val)=> {
-        console.log(val, '---')
         setNowLanguage(val)
         i18n.changeLanguage(val)
     }
+    
+    const initTitleBar = () => {
+        document
+            .getElementById('titlebar-minimize')
+            .addEventListener('click', () => appWindow.minimize())
+        document
+            .getElementById('titlebar-maximize')
+            .addEventListener('click', () => appWindow.toggleMaximize())
+        document
+            .getElementById('titlebar-close')
+            .addEventListener('click', () => appWindow.close())
+    }
+
+    const clientSaveFile = async (body, fuleSuffix) => {
+        const downloadDirPath = await downloadDir();
+        let download_name = downloadDirPath + 'iptv-checker-file-'+new Date().getTime()+"."+fuleSuffix
+        const filePath = await save({
+            defaultPath: download_name,
+            filters: [{
+                name: download_name,
+                extensions: [fuleSuffix]
+            }]
+        });
+        filePath && await writeTextFile(download_name, body)
+    }
 
     useEffect(() => {
+        setNowWindow({width: window.innerWidth, height: window.innerHeight})
+        window.addEventListener('resize', () => {
+            setNowWindow({width: window.innerWidth, height: window.innerHeight})
+        })
+        initTitleBar()
         invoke('now_mod', {}).then((response) => {
             overrideGlobalXHR()
             setNowMod(response)
+            console.log("now mod", response)
         }).catch(e => {
             console.log(e)
         })
@@ -674,7 +709,7 @@ export const MainContextProvider = function ({ children }) {
             pauseCheckUrlData, resumeCheckUrlData, strToCsv, clearDetailData,
             getM3uBody,
             needFastSource, onChangeNeedFastSource, nowMod, getBodyType,
-            nowLanguage, changeLanguage,languageList
+            nowLanguage, changeLanguage,languageList, nowWindow, clientSaveFile
         }}>
             {children}
         </MainContext.Provider>

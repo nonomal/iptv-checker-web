@@ -25,31 +25,31 @@ let menuList = [{
     "name": "检测源",
     "uri": "/check",
     "icon": "AdjustIcon",
-    'showMod':[0,1],
+    'showMod': [0, 1],
     'showHeader': true
 }, {
     "name": "公共订阅源",
     "uri": "/public",
     "icon": "PublicIcon",
-    'showMod':[0,1],
+    'showMod': [0, 1],
     'showHeader': true
-},{
+}, {
     "name": "在线观看",
     "uri": "/watch",
     "icon": "RemoveRedEyeIcon",
-    'showMod':[1],
+    'showMod': [1],
     'showHeader': true
 }, {
     "name": "定时检查任务",
     "uri": "/task",
     "icon": "CloudQueueIcon",
-    'showMod':[0,1],
+    'showMod': [0, 1],
     'showHeader': true
 }, {
     "name": "系统设置",
     "uri": "/settings",
     "icon": "SettingsIcon",
-    'showMod':[0,1],
+    'showMod': [0, 1],
     'showHeader': true
 }]
 
@@ -60,19 +60,19 @@ export default function Layout() {
     const navigate = useNavigate();
     const [nowSelectedMenu, setNowSelectedMenu] = useState({
         "name": "检测源",
-        "ename":"menu source check",
+        "ename": "menu source check",
         "uri": "/check",
         "icon": "AdjustIcon",
-        'showMod':[0,1],
+        'showMod': [0, 1],
         'showHeader': true
     })
 
     useEffect(() => {
-        if(location.pathname == '/detail') {
-            setNowSelectedMenu({'showHeader':false})
-        }else {
-            for (let i = 0;i<menuList.length;i++) {
-                if(location.pathname == menuList[i].uri) {
+        if (location.pathname == '/detail') {
+            setNowSelectedMenu({ 'showHeader': false })
+        } else {
+            for (let i = 0; i < menuList.length; i++) {
+                if (location.pathname == menuList[i].uri) {
                     setNowSelectedMenu(menuList[i])
                 }
             }
@@ -80,20 +80,6 @@ export default function Layout() {
     }, [location])
 
     const nowVersion = _package.version;
-
-    useEffect(() => {
-        if(_mainContext.nowMod === 1) {
-            document
-            .getElementById('titlebar-minimize')
-            .addEventListener('click', () => appWindow.minimize())
-            document
-            .getElementById('titlebar-maximize')
-            .addEventListener('click', () => appWindow.toggleMaximize())
-            document
-            .getElementById('titlebar-close')
-            .addEventListener('click', () => appWindow.close())
-        }
-    }, [])
 
     const changePath = (e) => {
         setNowSelectedMenu(e)
@@ -139,46 +125,41 @@ export default function Layout() {
                                         <ListItemText primary={t(value.name)} />
                                     </ListItemButton>
                                 </ListItem>
-                            ):''
+                            ) : ''
                         ))}
                 </List>
             </Box>
             <Box className="container-inner">
+                <div data-tauri-drag-region className="titlebar" style={{display: _mainContext.nowMod !== 1 ? 'none':''}}>
+                    <div className="titlebar-button" id="titlebar-minimize">
+                        <img
+                            src="https://api.iconify.design/mdi:window-minimize.svg"
+                            alt="minimize"
+                        />
+                    </div>
+                    <div className="titlebar-button" id="titlebar-maximize">
+                        <img
+                            src="https://api.iconify.design/mdi:window-maximize.svg"
+                            alt="maximize"
+                        />
+                    </div>
+                    <div className="titlebar-button" id="titlebar-close">
+                        <img src="https://api.iconify.design/mdi:close.svg" alt="close" />
+                    </div>
+                </div>
                 {
-                    _mainContext.nowMod === 1 ? (
-                        <div data-tauri-drag-region class="titlebar">
-                            <div class="titlebar-button" id="titlebar-minimize">
-                                <img
-                                src="https://api.iconify.design/mdi:window-minimize.svg"
-                                alt="minimize"
-                                />
-                            </div>
-                            <div class="titlebar-button" id="titlebar-maximize">
-                                <img
-                                src="https://api.iconify.design/mdi:window-maximize.svg"
-                                alt="maximize"
-                                />
-                            </div>
-                            <div class="titlebar-button" id="titlebar-close">
-                                <img src="https://api.iconify.design/mdi:close.svg" alt="close" />
-                            </div>
-                        </div>
-                    ):''
+                    nowSelectedMenu.showHeader ? (
+                        <>
+                            <div style={{
+                                fontSize: '40px',
+                                padding: '50px 10px',
+                                fontWeight: '600'
+                            }}>{t(nowSelectedMenu.name)}</div>
+                            <Divider style={{ marginBottom: '25px' }} />
+                        </>
+                    ) : ''
                 }
-            
-            {
-                nowSelectedMenu.showHeader ? (
-                    <>
-                        <div style={{
-                            fontSize: '40px',
-                            padding: '50px 10px',
-                            fontWeight: '600'
-                        }}>{t(nowSelectedMenu.name)}</div>
-                        <Divider style={{ marginBottom: '25px' }} />
-                    </>
-                ):''
-            }
-            <Outlet/>
+                <Outlet />
             </Box>
         </div>
     )

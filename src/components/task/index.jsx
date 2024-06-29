@@ -42,9 +42,6 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from '@mui/material/FormLabel';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { writeTextFile } from '@tauri-apps/api/fs';
-import { save } from '@tauri-apps/api/dialog';
-import { downloadDir } from '@tauri-apps/api/path';
 import { useTranslation, initReactI18next } from "react-i18next";
 
 const run_type_list = [{ "value": "EveryDay", "name": "每天" }, { "value": "EveryHour", "name": "每小时" }]
@@ -648,6 +645,7 @@ function DownloadDialog(props) {
     const handleClose = () => {
         onClose(false);
     };
+    const _mainContext = useContext(MainContext);
 
     useEffect(() => {
         setUrl(window.document.location.origin + "/" + formValue.url)
@@ -659,17 +657,12 @@ function DownloadDialog(props) {
     }, [formValue])
 
     const downloadFile = async() => {
-        // window.open(url)
-        const downloadDirPath = await downloadDir();
-        let download_name = downloadDirPath + 'iptv-checker-file-'+new Date().getTime()+".m3u"
-        const filePath = await save({
-            defaultPath: download_name,
-            filters: [{
-              name: download_name,
-              extensions: ['m3u']
-            }]
-        });
-        filePath && await writeTextFile(download_name, formValue.content)
+        _mainContext.saveFile()
+        if(_mainContext.nowMod === 1) {
+            window.open(url)
+        }else{
+            _mainContext.clientSaveFile(formValue.content, 'm3u')
+        }
     }
 
     return (

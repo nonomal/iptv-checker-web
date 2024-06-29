@@ -1,6 +1,5 @@
-import React, { useContext, useState, useMemo, createContext } from 'react'
+import React, { useContext } from 'react'
 import { MainContext } from './../../context/main';
-import { useEffect } from 'react';
 import { SortableList } from "./sortable";
 
 export default function sort(props) {

@@ -9,10 +9,64 @@ import { VirtualizedTable } from './vtable'
 import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import VideoJS from './../watch/video'
+import Dialog from '@mui/material/Dialog';
+import { appWindow } from "@tauri-apps/api/window";
+import { useTranslation, initReactI18next } from "react-i18next";
 
 export default function Detail() {
+  const { t } = useTranslation();
   const _mainContext = useContext(MainContext);
   const [vTableHeight, setVTableHeight] = useState(550)
+  const [videoJsOptions, setVideoJsOptions] = useState(null)
+  const [showWatch, setShowWatch] = useState(false)
+  const playerRef = React.useRef(null);
+  const handlePlayerReady = (player) => {
+      playerRef.current = player;
+
+      // You can handle player events here, for example:
+      player.on('waiting', () => {
+          console.log('player is waiting');
+      });
+
+      player.on('dispose', () => {
+          console.log('player will dispose');
+      });
+
+      player.on('fullscreen', (e) => {
+        console.log('full s', e)
+      })
+
+      player.ready(function() {
+        var fullScreenButton = player.controlBar.fullscreenToggle;
+      
+        fullScreenButton.on('click', function() {
+          appWindow.setFullscreen(true).then(res => {
+            console.log("set full screeen")
+          });
+        });
+      });
+  };
+
+  const [httpHeaders, setHttpHeaders] = useState([])
+  const setVideoOptions = (url) => {
+    setVideoJsOptions({
+        autoplay: true,
+        controls: true,
+        responsive: true,
+        fluid: true,
+        html5: {
+            vhs: {
+                withCredentials: true,
+                overrideNative: true
+            }
+        },
+        sources: [{
+            src: url,
+            type: 'video/mp2t'
+        }]
+    })
+  }
 
   const navigate = useNavigate();
   const [selectedArr, setSelectedArr] = useState([])//已选中的id
@@ -44,11 +98,11 @@ export default function Detail() {
     })
     window.addEventListener('beforeunload', (e) => {
       e.preventDefault()
-      let returnValue = '刷新后将跳转首页'
+      let returnValue = t('刷新后将跳转首页')
       e.returnValue = returnValue
     })
     if(_mainContext.showM3uBody.length === 0) {
-      navigate("/")
+      navigate("/check")
     }
   }, [])
 
@@ -61,6 +115,11 @@ export default function Detail() {
     }
     setSelectedArr(row)
     _mainContext.deleteShowM3uRow(index)
+  }
+
+  const watchThisRow = (val) => {
+    setShowWatch(true)
+    setVideoOptions(val)
   }
 
   const handleSelectCheckedAll = () => {
@@ -106,13 +165,21 @@ export default function Detail() {
     setShowChannelMod(2)
   }
 
+  const handleWatchClose = () => {
+    setShowWatch(false)
+  }
+
   return (
-    <Box>
+    <Box style={{padding: '0 20px'}}>
       <Setting setSelectedArr={setSelectedArr} selectedArr={selectedArr}></Setting>
+      <Dialog scroll="body" fullWidth onClose={handleWatchClose} open={showWatch}>
+        <div>
+          <VideoJS options={videoJsOptions} onReady={handlePlayerReady} headers={httpHeaders} />
+        </div>
+      </Dialog>
       <Paper style={{
         height: vTableHeight,
         marginTop: (_mainContext.headerHeight + 10) + "px",
-        minWidth: '800px'
       }}>
         <VirtualizedTable
           rowCount={_mainContext.showM3uBody.length}
@@ -122,7 +189,9 @@ export default function Detail() {
           selectAllRow={handleSelectCheckedAll}
           selectRow={onSelectedThisRow}
           seeDetail={seeDetail}
-          showOriginalUrl={_mainContext.settings.showFullUrl}
+          watchRow={watchThisRow}
+          t={() => t}
+          // showOriginalUrl={_mainContext.settings.showFullUrl}
           selectedArr={selectedArr}
           selectAll={handleSelectCheckedAll}
           handleMod={_mainContext.handleMod}
@@ -134,12 +203,12 @@ export default function Detail() {
             },
             {
               width: 600,
-              label: '名称',
+              label: t('名称'),
               dataKey: 'index',
             },
             {
               width: 100,
-              label: '延迟',
+              label: t('延迟'),
               dataKey: 'index',
             },
           ]}
@@ -160,16 +229,16 @@ export default function Detail() {
             <Box>
               <Box sx={{ display: "flex", flexDirection: "column" }}>
                 <FormControl sx={{ marginBottom: '25px', marginTop: '10px' }} fullWidth>
-                  <TextField disabled={showChannelMod === 1} sx={{ fontSize: '11px' }} label='频道名称' name="name" size="small" id="standard-multiline-static" value={showDetailObj.name} onChange={handleChange} />
+                  <TextField disabled={showChannelMod === 1} sx={{ fontSize: '11px' }} label={t('频道名称')} name="name" size="small" id="standard-multiline-static" value={showDetailObj.name} onChange={handleChange} />
                 </FormControl>
                 <FormControl sx={{ marginBottom: '25px' }} fullWidth>
-                  <TextField disabled={showChannelMod === 1} sx={{ fontSize: '11px' }} label='m3u8地址' name="url"  size="small" id="standard-multiline-static" value={showDetailObj.url} onChange={handleChange} />
+                  <TextField disabled={showChannelMod === 1} sx={{ fontSize: '11px' }} label={t('m3u8地址')} name="url"  size="small" id="standard-multiline-static" value={showDetailObj.url} onChange={handleChange} />
                 </FormControl>
                 <FormControl sx={{ marginBottom: '25px' }} fullWidth>
-                  <TextField disabled={showChannelMod === 1} sx={{ fontSize: '11px' }} label='logoUrl' name="tvgLogo"  size="small" id="standard-multiline-static" value={showDetailObj.tvgLogo} onChange={handleChange} />
+                  <TextField disabled={showChannelMod === 1} sx={{ fontSize: '11px' }} label={t('logoUrl')} name="tvgLogo"  size="small" id="standard-multiline-static" value={showDetailObj.tvgLogo} onChange={handleChange} />
                 </FormControl>
                 <FormControl sx={{ marginBottom: '15px' }} fullWidth>
-                  <TextField disabled={showChannelMod === 1} sx={{ fontSize: '11px' }} label='分组名称' name="groupTitle"  size="small" id="standard-multiline-static" value={showDetailObj.groupTitle} onChange={handleChange} />
+                  <TextField disabled={showChannelMod === 1} sx={{ fontSize: '11px' }} label={t('分组名称')} name="groupTitle"  size="small" id="standard-multiline-static" value={showDetailObj.groupTitle} onChange={handleChange} />
                 </FormControl>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                   {
@@ -180,7 +249,7 @@ export default function Detail() {
                         variant="contained"
                         sx={{ marginRight: '5px' }}
                       >
-                        保存并关闭
+                        {t('保存并关闭')}
                       </Button>
                     ) : ''
                   }
@@ -192,7 +261,7 @@ export default function Detail() {
                         variant="contained"
                         sx={{ marginRight: '5px' }}
                       >
-                        编辑
+                        {t('编辑')}
                       </Button>
                     ) : ''}
                   <Button
@@ -200,7 +269,7 @@ export default function Detail() {
                     onClick={closeShowChangeObj}
                     variant="contained"
                   >
-                    取消/关闭
+                    {t('取消/关闭')}
                   </Button>
                 </Box>
               </Box>

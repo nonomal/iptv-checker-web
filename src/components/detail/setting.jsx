@@ -7,10 +7,8 @@ import TextField from '@mui/material/TextField';
 import SimpleDialog from './dialog';
 import { styled } from '@mui/material/styles';
 import LoadingButton from '@mui/lab/LoadingButton';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import SearchIcon from '@mui/icons-material/Search';
-import SettingsIcon from '@mui/icons-material/Settings';
 import Button from '@mui/material/Button';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -27,10 +25,10 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import FindInPageIcon from '@mui/icons-material/FindInPage';
 import PauseIcon from '@mui/icons-material/Pause';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import utils from '../../utils/common';
 import ParseM3u from '../../utils/utils';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import { useTranslation, initReactI18next } from "react-i18next";
 
 const ListItem = styled('li')(({ theme }) => ({
     margin: theme.spacing(0.5),
@@ -51,6 +49,7 @@ const MenuProps = {
 export default function Setting(props) {
 
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const _mainContext = useContext(MainContext);
     const { selectedArr, setSelectedArr } = props;
     const [selectedGroups, setSelectedGroups] = useState([]);
@@ -82,6 +81,7 @@ export default function Setting(props) {
     }
 
     useEffect(() => {
+        console.log(window.location)
         initVideoResolution()
     }, [])
 
@@ -92,10 +92,6 @@ export default function Setting(props) {
             save.push({ ...list[i], checked: false })
         }
         _mainContext.changeVideoResolution(save)
-    }
-
-    const goback = () => {
-        navigate("/")
     }
 
     const handleChangeSearchTitle = (e) => {
@@ -205,13 +201,13 @@ export default function Setting(props) {
     return (
         <Box sx={{
             position: 'fixed',
-            width: '100%',
-            height: _mainContext.headerHeight + "px",
+            width: 'calc(100% - 290px)',
             borderBottom: '1px solid #eee',
             top: 0,
-            left: 0,
+            left: 290,
             zIndex: 999,
-            padding: '8px'
+            padding: '8px',
+            boxShadow:"1px 1px 4px pink"
         }}>
             <SimpleDialog
                 open={open}
@@ -222,21 +218,15 @@ export default function Setting(props) {
                 mod={dialogMod}
             />
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Box sx={{ maxWidth: "800px" }}>
+                <Box>
                     <Box sx={{ marginBottom: '10px' }}>
                         <FormControl sx={{ marginRight: '5px' }}>
-                            <LoadingButton
-                                size="small"
-                                onClick={goback}
-                                startIcon={<ArrowBackIcon />}
-                            >
-                                返回
-                            </LoadingButton>
+                            <Button startIcon={<FindInPageIcon />} size="small" onClick={showOriginalM3uBodyInfo} variant="outlined">{t('原始数据')}</Button>
                         </FormControl>
                         <FormControl sx={{ marginRight: '5px' }}>
                             {
                                 _mainContext.handleMod === 1 ? (
-                                    <Box>检查进度：{_mainContext.hasCheckedCount}/{_mainContext.showM3uBody.length}</Box>
+                                    <Box>{t('检查进度')}：{_mainContext.hasCheckedCount}/{_mainContext.showM3uBody.length}</Box>
                                 ) : ''
                             }
                         </FormControl>
@@ -251,7 +241,7 @@ export default function Setting(props) {
                                         variant="outlined"
                                         startIcon={<HelpOutlineIcon />}
                                     >
-                                        检查直播源链接是否有效
+                                        {t('开始检查')}
                                     </LoadingButton>
                                 </FormControl>
                             ) : ''
@@ -264,7 +254,7 @@ export default function Setting(props) {
                                     variant="outlined"
                                     startIcon={<PauseIcon />}
                                 >
-                                    暂停检查
+                                    {t('暂停检查')}
                                 </LoadingButton>
                             ) : ''
                         }
@@ -276,7 +266,7 @@ export default function Setting(props) {
                                     variant="outlined"
                                     startIcon={<PlayArrowIcon />}
                                 >
-                                    恢复检查
+                                    {t('恢复检查')}
                                 </LoadingButton>
                             ) : ''
                         }
@@ -291,12 +281,16 @@ export default function Setting(props) {
                                         variant="contained"
                                         startIcon={<CheckCircleOutlineIcon />}
                                     >
-                                        有效链接
+                                        {t('有效链接')}
                                     </LoadingButton>
-                                    <FormControlLabel 
-                                    size="small"
-                                    control={<Checkbox size="small" checked={_mainContext.needFastSource} onChange={handleNeedFastSource} />} 
-                                    label="选择延迟最低的源" />
+                                    {
+                                        _mainContext.nowMod === 0 ? (
+                                            <FormControlLabel 
+                                            size="small"
+                                            control={<Checkbox size="small" checked={_mainContext.needFastSource} onChange={handleNeedFastSource} />} 
+                                            label={t('选择延迟最低的源')} />
+                                        ):''
+                                    }
                                 </FormControl>
                             ) : ''
                         }
@@ -311,7 +305,7 @@ export default function Setting(props) {
                                         variant="outlined"
                                         startIcon={<ErrorOutlineIcon />}
                                     >
-                                        无效链接
+                                        {t('无效链接')}
                                     </LoadingButton>
                                 </FormControl>
                             ) : ''
@@ -328,7 +322,7 @@ export default function Setting(props) {
                                         variant="outlined"
                                         startIcon={<DeleteIcon />}
                                     >
-                                        删除选中
+                                        {t('删除选中')}
                                     </LoadingButton>
                                 </FormControl>
                             ) : ''
@@ -344,7 +338,7 @@ export default function Setting(props) {
                                         variant="outlined"
                                         startIcon={<ChangeCircleIcon />}
                                     >
-                                        更换选中分组
+                                        {t('更换选中分组')}
                                     </LoadingButton>
                                 </FormControl>
                             ) : ''
@@ -360,7 +354,7 @@ export default function Setting(props) {
                                         variant="contained"
                                         startIcon={<ExitToAppIcon />}
                                     >
-                                        导出(下一步)
+                                        {t('导出(下一步)')}
                                     </LoadingButton>
                                 </FormControl>
                             ) : ''
@@ -378,7 +372,7 @@ export default function Setting(props) {
                                     id="outlined-name"
                                     value={searchTitle}
                                     onChange={handleChangeSearchTitle}
-                                    label="多关键词搜索"
+                                    label={t('多关键词搜索')}
                                     variant="standard"
                                 />
                             </FormControl>
@@ -389,11 +383,11 @@ export default function Setting(props) {
                                     variant="outlined"
                                     startIcon={<AddCircleOutlineIcon />}
                                 >
-                                    关键词
+                                    {t('关键词')}
                                 </LoadingButton>
                             </FormControl>
                             <FormControl sx={{ width: 200, margin: 0, marginRight: '5px' }} size="small">
-                                <InputLabel id="demo-select-small" size="small">过滤分组</InputLabel>
+                                <InputLabel id="demo-select-small" size="small">{t('过滤分组')}</InputLabel>
                                 <Select
                                     labelId="demo-select-small"
                                     id="demo-select-small"
@@ -401,7 +395,7 @@ export default function Setting(props) {
                                     multiple
                                     value={selectedGroups}
                                     onChange={handleChangeGroup}
-                                    input={<OutlinedInput size="small" label="过滤分组" />}
+                                    input={<OutlinedInput size="small" label={t('过滤分组')} />}
                                     renderValue={(selectedGroups) => selectedGroups.join(', ')}
                                     MenuProps={MenuProps}
                                 >
@@ -416,7 +410,7 @@ export default function Setting(props) {
                             {
                                 _mainContext.handleMod === 2 ? (
                                     <FormControl sx={{ width: 200, margin: 0, marginRight: '5px' }} size="small">
-                                        <InputLabel id="demo-select-small" size="small">过滤视频清晰度</InputLabel>
+                                        <InputLabel id="demo-select-small" size="small">{t('过滤视频清晰度')}</InputLabel>
                                         <Select
                                             labelId="demo-select-small"
                                             id="demo-select-small"
@@ -424,7 +418,7 @@ export default function Setting(props) {
                                             multiple
                                             value={selectedVideoTypes}
                                             onChange={handleChangeVideoTypes}
-                                            input={<OutlinedInput size="small" label="过滤视频清晰度" />}
+                                            input={<OutlinedInput size="small" label={t('过滤视频清晰度')} />}
                                             renderValue={(selectedVideoTypes) => selectedVideoTypes.join(', ')}
                                             MenuProps={MenuProps}
                                         >
@@ -446,14 +440,14 @@ export default function Setting(props) {
                                     color="success"
                                     startIcon={<SearchIcon />}
                                 >
-                                    搜索
+                                    {t('搜索')}
                                 </LoadingButton>
                             </FormControl>
                         </Box>
                     </Box>
                     <Box sx={{ paddingRight: "20px", fontSize: '12px' }}>
                         {
-                            chipData.length > 0 ? '频道名称包含:' : ''
+                            chipData.length > 0 ? t('频道名称包含')+":" : ''
                         }
                         {chipData.map((value, index) => {
                             return (
@@ -464,36 +458,21 @@ export default function Setting(props) {
                                         onDelete={handleDeleteChip(index)}
                                     />
                                     {
-                                        index < chipData.length - 1 ? '或' : ''
+                                        index < chipData.length - 1 ? t('或') : ''
                                     }
                                 </ListItem>
                             );
                         })}
                         {
-                            chipData.length > 0 && selectedGroups.length > 0 ? '且' : ''
+                            chipData.length > 0 && selectedGroups.length > 0 ? t('且') : ''
                         }
                         {
-                            selectedGroups.length > 0 ? '只显示分组为[' + selectedGroups.join(',') + ']的数据' : ''
+                            selectedGroups.length > 0 ? t('只显示分组为')+'[' + selectedGroups.join(',') + ']'+t('的数据') : ''
                         }
                         {
-                            chipData.length > 0 || selectedGroups.length ? ',需要点击【搜索】按钮进行筛选' : ''
+                            chipData.length > 0 || selectedGroups.length ? ','+t('需要点击【搜索】按钮进行筛选') : ''
                         }
                     </Box>
-                </Box>
-                <Box sx={{ paddingRight: "10px" }}>
-                    <FormControl sx={{ marginRight: '5px' }}>
-                        <Button startIcon={<FindInPageIcon />} size="small" onClick={showOriginalM3uBodyInfo} variant="outlined">原始数据</Button>
-                    </FormControl>
-                    <FormControl sx={{ marginRight: '5px' }}>
-                        <LoadingButton
-                            size="small"
-                            onClick={showSetting}
-                            variant="outlined"
-                            startIcon={<SettingsIcon />}
-                        >
-                            设置
-                        </LoadingButton>
-                    </FormControl>
                 </Box>
             </Box>
         </Box>

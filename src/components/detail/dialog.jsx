@@ -4,7 +4,6 @@ import Dialog from '@mui/material/Dialog';
 import Box from '@mui/material/Box';
 import FormControl from '@mui/material/FormControl';
 import TextField from '@mui/material/TextField';
-import Switch from '@mui/material/Switch';
 import LoadingButton from '@mui/lab/LoadingButton';
 import PropTypes from 'prop-types';
 import GetAppIcon from '@mui/icons-material/GetApp';
@@ -20,6 +19,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import { useTranslation, initReactI18next } from "react-i18next";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -42,6 +42,7 @@ function TabPanel(props) {
 }
 
 export default function SimpleDialog(props) {
+  const { t } = useTranslation();
   const _mainContext = useContext(MainContext);
 
   //mod == 1 下载界面 2预览原始m3u信息
@@ -62,15 +63,15 @@ export default function SimpleDialog(props) {
     setGroupTab(0)
     setSelectedGroups('')
     if (mod === 1) {
-      setShowTextAreaLable('您所选择的m3u信息')
+      setShowTextAreaLable(t('您所选择的m3u信息'))
     } else if (mod === 2) {
-      setShowTextAreaLable('原始数据')
+      setShowTextAreaLable(t('原始数据'))
     } else if (mod === 3) {
-      setShowTextAreaLable('设置')
+      setShowTextAreaLable(t('设置'))
     } else if (mod === 4) {
-      setShowTextAreaLable('排序(数据较多时,可能影响排序列表性能,建议分批操作)')
+      setShowTextAreaLable(t('排序(数据较多时,可能影响排序列表性能,建议分批操作)'))
     } else if (mod === 5) {
-      setShowTextAreaLable('更改分组')
+      setShowTextAreaLable(t('更改分组'))
     }
   }, [mod])
 
@@ -79,30 +80,37 @@ export default function SimpleDialog(props) {
   };
 
   const doDownload = () => {
-    var a = document.createElement('a')
-    var blob = new Blob([_mainContext.exportDataStr])
-    var url = window.URL.createObjectURL(blob)
-    a.href = url
-    a.download = 'iptv-checker-' + (new Date()).getTime() + ".m3u"
-    a.click()
+    if(_mainContext.nowMod === 1) {
+      _mainContext.clientSaveFile(_mainContext.exportDataStr, 'm3u')
+    }else{
+      var a = document.createElement('a')
+      var blob = new Blob([_mainContext.exportDataStr])
+      var url = window.URL.createObjectURL(blob)
+      a.href = url
+      a.download = 'iptv-checker-' + (new Date()).getTime() + ".m3u"
+      a.click()
+    }
   }
 
   const doCsvDownload = () => {
     let csvArr = _mainContext.strToCsv(_mainContext.exportDataStr)
-    // 将数据行转换为 CSV 字符串
-    const csvContent = csvArr.map(e => e.join(",")).join("\n");
-
-    // 创建下载链接并将 CSV 文件下载到本地
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", "iptv-checker-" + (new Date()).getTime() + ".csv");
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    onClose();
+      // 将数据行转换为 CSV 字符串
+      const csvContent = csvArr.map(e => e.join(",")).join("\n");
+    if(_mainContext.nowMod === 1) {
+      _mainContext.clientSaveFile(csvContent, 'csv')
+    }else{
+      // 创建下载链接并将 CSV 文件下载到本地
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "iptv-checker-" + (new Date()).getTime() + ".csv");
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      onClose();
+    }
   }
 
   const doDoAgain = () => {
@@ -150,9 +158,6 @@ export default function SimpleDialog(props) {
   const handleChangeConfigSettings = (e) => {
     const { name, value } = e.target;
     let data = value
-    if (name === 'showFullUrl') {
-      data = e.target.checked
-    }
     setConfigSettings(prevData => ({
       ...prevData,
       [name]: data
@@ -161,65 +166,12 @@ export default function SimpleDialog(props) {
 
   return (
     <Dialog onClose={handleClose} open={open}>
-      <Box style={{ minWidth: mod !== 3 ? '600px' : '', 'paddingTop': '10px', 'overflow':'hidden' }}>
+      <Box style={{ minWidth: mod !== 3 ? '800px' : '', 'paddingTop': '10px', 'overflow':'hidden' }}>
         <span style={{ paddingLeft: '10px'}}>{showTextAreaLable}</span>
       </Box>
-      {
-        mod === 3 ? (
-          <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '20px'
-          }}>
-            <FormControl sx={{ width: 200, marginRight: '5px', marginBottom: '10px' }}>
-              <TextField
-                size="small"
-                name="checkSleepTime"
-                value={configSettings.checkSleepTime}
-                onChange={handleChangeConfigSettings}
-                label="下一次请求间隔时间（毫秒）"
-              />
-            </FormControl>
-            <FormControl sx={{
-              width: 220,
-              marginRight: '5px',
-              display: 'flex',
-              flexDirection: 'row',
-              marginBottom: '40px',
-              marginTop: '20px'
-            }}>
-              <span style={{fontSize: '12px'}}>不显示原始URL</span>
-              <Switch
-                size="small"
-                name="showFullUrl"
-                checked={configSettings.showFullUrl}
-                onChange={handleChangeConfigSettings}
-                inputProps={{ 'aria-label': 'controlled' }}
-              /><span style={{fontSize: '12px'}}>不显示原始URL</span>
-            </FormControl>
-            <FormControl sx={{ width: 200, marginRight: '5px', marginBottom: '10px' }}>
-              <TextField
-                size="small"
-                name="httpRequestTimeout"
-                value={configSettings.httpRequestTimeout}
-                onChange={handleChangeConfigSettings}
-                label="检查超时时间（毫秒）"
-              />
-            </FormControl>
-            <LoadingButton
-              size="small"
-              onClick={doSaveConfigSettings}
-              variant="outlined"
-              sx={{width: 200}}
-            >
-              保存
-            </LoadingButton>
-          </Box>
-        ) : ''
-      }
       {mod === 1 || mod === 2 ? (
         <FormControl sx={{ width: 550, margin: '10px' }}>
-          <TextField multiline sx={{ fontSize: '11px' }} label={showTextAreaLable} size="small" id="standard-multiline-static" rows={4} value={_mainContext.exportDataStr} />
+          <TextField multiline sx={{ fontSize: '11px' }} size="small" id="standard-multiline-static" rows={4} value={_mainContext.exportDataStr} />
         </FormControl>
       ) : ''}
       {
@@ -240,7 +192,7 @@ export default function SimpleDialog(props) {
                   style={{ marginRight: '10px' }}
                   startIcon={<SkipNextIcon />}
                 >
-                  继续(下一步)
+                  {t('下一步')}
                 </LoadingButton>
               </FormControl>
             </Box>
@@ -262,7 +214,7 @@ export default function SimpleDialog(props) {
               style={{ marginRight: '10px' }}
               startIcon={<SkipPreviousIcon />}
             >
-              上一步
+              {t('上一步')}
             </LoadingButton>
             <LoadingButton
               size="small"
@@ -271,7 +223,7 @@ export default function SimpleDialog(props) {
               style={{ marginRight: '10px' }}
               startIcon={<GetAppIcon />}
             >
-              下载m3u文件
+              {t('下载m3u文件')}
             </LoadingButton>
             <LoadingButton
               size="small"
@@ -280,7 +232,7 @@ export default function SimpleDialog(props) {
               style={{ marginRight: '10px' }}
               startIcon={<InsertDriveFileIcon />}
             >
-              下载csv文件
+              {t('下载csv文件')}
             </LoadingButton>
             <LoadingButton
               size="small"
@@ -288,7 +240,7 @@ export default function SimpleDialog(props) {
               variant="contained"
               startIcon={<AutorenewIcon />}
             >
-              再次处理
+              {t('再次处理')}
             </LoadingButton>
           </FormControl>
         ) : ''
@@ -298,18 +250,18 @@ export default function SimpleDialog(props) {
           <Box sx={{ width: 550, margin: '10px' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
               <Tabs value={groupTab} onChange={handleChangeGroupTab} aria-label="basic tabs example">
-                <Tab label="已有分组" />
-                <Tab label="新增分组" />
+                <Tab label={t('已有分组')} />
+                <Tab label={t('新增分组')} />
               </Tabs>
             </Box>
             <TabPanel value={groupTab} index={0}>
               <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">更换分组</InputLabel>
+                <InputLabel id="demo-simple-select-label">{t('更换分组')}</InputLabel>
                 <Select
                   labelId="demo-simple-select-label"
                   id="demo-simple-select"
                   value={selectedGroups}
-                  label="更换分组"
+                  label={t('更换分组')}
                   onChange={handleChangeGroup}
                 >
                   {_mainContext.uGroups.map((value, index) => (
@@ -320,7 +272,7 @@ export default function SimpleDialog(props) {
             </TabPanel>
             <TabPanel value={groupTab} index={1}>
               <FormControl fullWidth>
-                <TextField id="standard-basic" label="输入新分组名称" value={customGroupName}
+                <TextField id="standard-basic" label={t('输入新分组名称')} value={customGroupName}
                   variant="standard" onChange={changeCustomGroupName} />
               </FormControl>
             </TabPanel>
@@ -329,7 +281,7 @@ export default function SimpleDialog(props) {
               justifyContent: 'flex-end',
               marginTop: '5px'
             }}>
-              <Button variant="outlined" onClick={doTransferGroup}>确定</Button>
+              <Button variant="outlined" onClick={doTransferGroup}>{groupTab === 0? t('更改'):t('新增')}</Button>
             </Box>
           </Box>
         ) : ''

@@ -205,14 +205,18 @@ export default function Settings() {
                         onChange={handleChangeConfigSettings}
                     />
                 </FormControl>
-                <FormControl sx={{ marginBottom: '20px' }}>
-                    <FormLabel id="demo-row-radio-buttons-group-label">{t('后台检查server域名')},{t('示例')}：http://127.0.0.1:8089</FormLabel>
-                    <TextField
-                        name="privateHost"
-                        value={privateHost}
-                        onChange={handleChangeConfigSettings}
-                    />
-                </FormControl>
+                {
+                    _mainContext.nowMod === 1 ? (
+                        <FormControl sx={{ marginBottom: '20px' }}>
+                            <FormLabel id="demo-row-radio-buttons-group-label">{t('后台检查server域名')},{t('示例')}：http://127.0.0.1:8089</FormLabel>
+                            <TextField
+                                name="privateHost"
+                                value={privateHost}
+                                onChange={handleChangeConfigSettings}
+                            />
+                        </FormControl>
+                    ):''
+                }
                 <FormControl sx={{ marginBottom: '20px' }}>
                     <FormLabel id="demo-row-radio-buttons-group-label">
                         {t('自定义网络源')}

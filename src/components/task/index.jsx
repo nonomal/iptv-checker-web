@@ -60,6 +60,7 @@ const defaultValue = {
         "check_timeout": 20000,
         "concurrent": 30,
         "sort": false,
+        "no_check": false,
     },
     "id": "",
     "create_time": 0,
@@ -136,6 +137,7 @@ function TaskForm(props) {
             formValue.original.check_timeout = formValue.original.check_timeout ?? 0;
             formValue.original.concurrent = formValue.original.concurrent ?? 0;
             formValue.original.sort = formValue.original.sort ?? false;
+            formValue.original.no_check = formValue.original.no_check ?? false;
             setTask(formValue)
         } else {
             let default_data = JSON.parse(JSON.stringify(defaultValue))
@@ -306,6 +308,22 @@ function TaskForm(props) {
             original: {
                 ...task.original,
                 http_timeout: parseInt(e.target.value, 10)
+            }
+        });
+    }
+
+    const handleChangeNoCheckValue = (e) => {
+        let checked = false
+        if (e.target.defaultValue === "false") {
+            checked = false
+        } else {
+            checked = true
+        }
+        setTask({
+            ...task,
+            original: {
+                ...task.original,
+                no_check: checked
             }
         });
     }
@@ -509,7 +527,9 @@ function TaskForm(props) {
                                 startIcon={<MoodBadIcon />}>{t('添加不看')}</Button>
                         </Stack>
                     </FormControl>
-                    <FormControl>
+                    <FormControl fullWidth style={{
+                        margin: "20px 0 20px",
+                    }}>
                         <FormLabel id="demo-row-radio-buttons-group-label">{t('是否需要排序')}</FormLabel>
                         <RadioGroup
                             row
@@ -517,6 +537,21 @@ function TaskForm(props) {
                             name="row-radio-buttons-group"
                             value={task.original.sort}
                             onChange={handleChangeSortValue}
+                        >
+                            <FormControlLabel value="false" control={<Radio />} label={t('否')} />
+                            <FormControlLabel value="true" control={<Radio />} label={t('是')} />
+                        </RadioGroup>
+                    </FormControl>
+                    <FormControl fullWidth style={{
+                        margin: "20px 0 20px",
+                    }}>
+                        <FormLabel id="demo-row-radio-buttons-group-label">{t('是否不需要检查')}</FormLabel>
+                        <RadioGroup
+                            row
+                            aria-labelledby="demo-row-radio-buttons-group-label"
+                            name="row-radio-buttons-group"
+                            value={task.original.no_check}
+                            onChange={handleChangeNoCheckValue}
                         >
                             <FormControlLabel value="false" control={<Radio />} label={t('否')} />
                             <FormControlLabel value="true" control={<Radio />} label={t('是')} />
@@ -723,15 +758,21 @@ export default function TaskList(props) {
     const privateHostRef = useRef("")
     const { t } = useTranslation();
     useEffect(() => {
-        let config = _mainContext.settings
-        if(config !== null) {
-            if(config.privateHost !== '') {
-                setPrivateHost(config.privateHost)
-                privateHostRef.current = config.privateHost
-                get_task_list()
+        if(_mainContext.nowMod === 1) {
+            let config = _mainContext.settings
+            if(config !== null) {
+                if(config.privateHost !== '') {
+                    setPrivateHost(config.privateHost)
+                    privateHostRef.current = config.privateHost
+                    get_task_list()
+                }
             }
         }
     }, [_mainContext])
+
+    useEffect(() => {
+        get_task_list()
+    }, [])
 
     const [formDialog, setFormDialog] = React.useState(false);
     const [formValue, setFormValue] = React.useState(null);
@@ -773,6 +814,7 @@ export default function TaskList(props) {
             "http_timeout": value.original.http_timeout,
             "check_timeout": value.original.check_timeout,
             "sort": value.original.sort,
+            "no_check": value.original.no_check,
             "concurrent": value.original.concurrent,
         }
     }
@@ -790,7 +832,11 @@ export default function TaskList(props) {
     }
 
     const getHost = () => {
-        return privateHostRef.current
+        if(_mainContext.nowMod === 0) {
+            return ''
+        }else{
+            return privateHostRef.current
+        }
     }
 
     const task_add = (value) => {
@@ -867,7 +913,7 @@ export default function TaskList(props) {
     return (
         <Box style={{padding: '0 20px'}}>
             {
-                privateHost ? (
+                privateHost || _mainContext.nowMod === 0 ? (
             <>
             <Box style={{marginBottom: '10px'}}>
                 <Button 
@@ -900,7 +946,11 @@ export default function TaskList(props) {
                 open={openDownloadBody}
                 onClose={() => handleDownloadClose(false)}
             />
-            <p>{t('当前设置的【后台检查server域名】为')}：{privateHost}</p>
+            {
+                _mainContext.nowMod === 1 ? (
+                    <p>{t('当前设置的【后台检查server域名】为')}：{privateHost}</p>
+                ):''
+            }
             <Paper sx={{ width: '1024px', overflow: 'hidden' }}>
                 <TableContainer>
                 <Table aria-label="simple table">

@@ -111,26 +111,15 @@ class MuiVirtualizedTable extends React.PureComponent {
                         <div>
                             <div style={{ fontWeight: '600', cursor: 'pointer' }}>
                                 {cellData} - <span onClick={() => seeDetail(originalData[this.getObjectIndexIndex(cellData)])}>{originalData[this.getObjectIndexIndex(cellData)].name}</span>
-                                {/* {
-                                    handleMod !== 1 ? (
-                                        <Tooltip title="删除">
-                                            <IconButton size="small" onClick={() => delRow(cellData, columnIndex)}>
-                                                <DeleteIcon fontSize="small" sx={{ color: red[400] }} />
-                                            </IconButton>
-                                        </Tooltip>
-                                    ) : ''
-                                } */}
                                 {
-                                    handleMod !== 1 ? (
-                                        <Tooltip title={t('观看')}>
-                                            <IconButton size="small" onClick={() => watchRow(originalData[this.getObjectIndexIndex(cellData)].url)}>
-                                                <LiveTvIcon fontSize="small" sx={{ color: green[400] }} />
-                                            </IconButton>
-                                        </Tooltip>
+                                    nowMod === 1 ? (
+                                        <IconButton size="small" onClick={() => watchRow(originalData[this.getObjectIndexIndex(cellData)])}>
+                                            <LiveTvIcon fontSize="small" sx={{ color: green[400] }} />
+                                        </IconButton>
                                     ) : ''
                                 }
                             </div>
-                            <div style={{ fontSize: '12px', color: '#7a7a7a',overflow:'hidden' }}><i>{originalData[this.getObjectIndexIndex(cellData)].url}</i></div>
+                            <div style={{ fontSize: '12px', color: '#7a7a7a',overflow:'hidden',height:'16px' }}><i>{originalData[this.getObjectIndexIndex(cellData)].url}</i></div>
                             <div style={{ fontSize: '12px', color: '#7a7a7a' }}>{originalData[this.getObjectIndexIndex(cellData)].video ? "" + originalData[this.getObjectIndexIndex(cellData)].video.width + "x" + originalData[this.getObjectIndexIndex(cellData)].video.height + "-" + originalData[this.getObjectIndexIndex(cellData)].video.codec + "" : ''}{'-'}{originalData[this.getObjectIndexIndex(cellData)].audio ? "" + originalData[this.getObjectIndexIndex(cellData)].audio.codec + "-" + originalData[this.getObjectIndexIndex(cellData)].audio.channels + " audio channels" : ''}</div>
                         </div>
                     ) : ''
@@ -149,7 +138,7 @@ class MuiVirtualizedTable extends React.PureComponent {
                             }
                             {
                                 originalData[this.getObjectIndexIndex(cellData)].status === 1 ? (
-                                        nowMod === 1 ? (
+                                        nowMod === 0 ? (
                                             <div style={{
                                                 color: originalData[this.getObjectIndexIndex(cellData)].delay < 500 ? 'green' : 'red',
                                                 fontWeight: "bold",

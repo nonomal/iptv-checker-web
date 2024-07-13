@@ -11,8 +11,9 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import VideoJS from './../watch/video'
 import Dialog from '@mui/material/Dialog';
-import { appWindow } from "@tauri-apps/api/window";
+import { appWindow,WebviewWindow } from "@tauri-apps/api/window";
 import { useTranslation, initReactI18next } from "react-i18next";
+import { emit, listen } from '@tauri-apps/api/event'
 
 export default function Detail() {
   const { t } = useTranslation();
@@ -49,25 +50,6 @@ export default function Detail() {
   };
 
   const [httpHeaders, setHttpHeaders] = useState([])
-  const setVideoOptions = (url) => {
-    setVideoJsOptions({
-        autoplay: true,
-        controls: true,
-        responsive: true,
-        fluid: true,
-        html5: {
-            vhs: {
-                withCredentials: true,
-                overrideNative: true
-            }
-        },
-        sources: [{
-            src: url,
-            type: 'video/mp2t'
-        }]
-    })
-  }
-
   const navigate = useNavigate();
   const [selectedArr, setSelectedArr] = useState([])//已选中的id
   const [showChannelMod, setShowChannelMod] = useState(0)// 0不显示弹框 1展示非编辑 2编辑页面
@@ -117,9 +99,38 @@ export default function Detail() {
     _mainContext.deleteShowM3uRow(index)
   }
 
-  const watchThisRow = (val) => {
-    setShowWatch(true)
-    setVideoOptions(val)
+  const watchThisRow = async (val) => {
+    if(_mainContext.nowMod === 1) {
+      let label = 'watch'
+      let data = WebviewWindow.getByLabel(label);
+      if(data !== null) {
+        // 携带负载对象触发 `click` 事件
+        emit('changeWatchUrl', {
+          data: val,
+        })
+        return 
+      }
+      const webview = new WebviewWindow(label, {
+        url: '/watch/single?url='+val.url,
+        title:val.name,
+        width: 1024,
+        height: 600,
+        skipTaskbar: true,
+        decorations: false
+      })
+      
+      // since the webview window is created asynchronously,
+      // Tauri emits the `tauri://created` and `tauri://error` to notify you of the creation response
+      webview.once('tauri://created', function () {
+        // webview window successfully created
+      })
+      webview.once('tauri://error', function (e) {
+        console.log('traui error ', e)
+        // an error occurred during webview window creation
+      })
+    }else{
+      window.open('/watch/single?url='+val.url)
+    }
   }
 
   const handleSelectCheckedAll = () => {
@@ -153,6 +164,10 @@ export default function Detail() {
   }
 
   const seeDetail = (val) => {
+    if(showChannelMod !== 0 &&  showDetailObj !== null  && val.index === showDetailObj.index) {
+      setShowChannelMod(0)
+      return 
+    }
     setShowChannelMod(1)
     setShowDetailObj(val)
   }
@@ -171,7 +186,7 @@ export default function Detail() {
 
   return (
     <Box style={{padding: '0 20px'}}>
-      <Setting setSelectedArr={setSelectedArr} selectedArr={selectedArr}></Setting>
+      <Setting style={{marginTop: '20px'}} setSelectedArr={setSelectedArr} selectedArr={selectedArr}></Setting>
       <Dialog scroll="body" fullWidth onClose={handleWatchClose} open={showWatch}>
         <div>
           <VideoJS options={videoJsOptions} onReady={handlePlayerReady} headers={httpHeaders} />
@@ -190,6 +205,7 @@ export default function Detail() {
           selectRow={onSelectedThisRow}
           seeDetail={seeDetail}
           watchRow={watchThisRow}
+          nowMod={_mainContext.nowMod}
           t={() => t}
           // showOriginalUrl={_mainContext.settings.showFullUrl}
           selectedArr={selectedArr}

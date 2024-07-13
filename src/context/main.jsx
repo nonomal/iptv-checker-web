@@ -24,15 +24,15 @@ export const MainContextProvider = function ({ children }) {
     const [checkData, setCheckData] = useState([])//待检查数据列表
     const [videoResolution, setVideoResolution] = useState([])//视频分辨率筛选
     const [needFastSource, setNeedFastSource] = useState(false)// 是否选择最快的源, false否， true是
-    const [nowMod, setNowMod] = useState(0);// 当前运行模式 0服务端模式 1客户端模式
+    const [nowMod, setNowMod] = useState(1);// 当前运行模式 0服务端模式 1客户端模式
     const [nowLanguage, setNowLanguage] = useState('en')
-    const [nowWindow, setNowWindow] = useState({width: 0, height: 0})
+    const [nowWindow, setNowWindow] = useState({ width: 0, height: 0 })
     const [languageList, setLanguageList] = useState([{
-        'code':'en',
-        "name":"English"
+        'code': 'en',
+        "name": "English"
     }, {
-        'code':'zh',
-        "name":"中文"
+        'code': 'zh',
+        "name": "中文"
     }])
 
     const [settings, setSettings] = useState({
@@ -41,7 +41,7 @@ export const MainContextProvider = function ({ children }) {
         customLink: [],//自定义配置
         concurrent: 1,//并发数
         language: 'en',//语言
-        privateHost:'',//私有host
+        privateHost: '',//私有host
     })
 
     const nowCheckUrlModRef = useRef()//当前操作类型
@@ -57,11 +57,11 @@ export const MainContextProvider = function ({ children }) {
         }
     }
 
-    const changeLanguage  = (val)=> {
+    const changeLanguage = (val) => {
         setNowLanguage(val)
         i18n.changeLanguage(val)
     }
-    
+
     const initTitleBar = () => {
         document
             .getElementById('titlebar-minimize')
@@ -76,7 +76,7 @@ export const MainContextProvider = function ({ children }) {
 
     const clientSaveFile = async (body, fuleSuffix) => {
         const downloadDirPath = await downloadDir();
-        let download_name = downloadDirPath + 'iptv-checker-file-'+new Date().getTime()+"."+fuleSuffix
+        let download_name = downloadDirPath + 'iptv-checker-file-' + new Date().getTime() + "." + fuleSuffix
         const filePath = await save({
             defaultPath: download_name,
             filters: [{
@@ -88,9 +88,9 @@ export const MainContextProvider = function ({ children }) {
     }
 
     useEffect(() => {
-        setNowWindow({width: window.innerWidth, height: window.innerHeight})
+        setNowWindow({ width: window.innerWidth, height: window.innerHeight })
         window.addEventListener('resize', () => {
-            setNowWindow({width: window.innerWidth, height: window.innerHeight})
+            setNowWindow({ width: window.innerWidth, height: window.innerHeight })
         })
         initTitleBar()
         invoke('now_mod', {}).then((response) => {
@@ -117,21 +117,109 @@ export const MainContextProvider = function ({ children }) {
         setNeedFastSource(val)
     }
 
-    const getBodyType = (body) => {
-        if (body.includes('#EXTM3U') || body.includes('#EXTINF')) {
-            return 1//  normal m3u8 body
-        } else {
-            let isM3uArr = false;
-            let expUrl = body.split(",");
-            if (expUrl.length > 0) {
-                if (utils.isValidUrl(expUrl[0])) {
-                    isM3uArr = true
+    // 解析m3u8文件， 类似：https://xxxx.m3u8, https://xxx2.m3u8
+    const getBodyTypeM3u8List = async (body) => {
+        let rows = body.split(',');
+        let result = [];
+        for (let i = 0; i < rows.length; i++) {
+            if (isValidUrl(rows[i]) && rows[i].includes(".m3u8")) {
+                let name = 'channel ' + i
+                let originalData = `#EXTINF:-1 tvg-id="" tvg-logo="" group-title="Undefined",` + name + `\n` + rows[i]
+                let raw = `#EXTINF:-1 tvg-id="" tvg-logo="" group-title="Undefined",` + name + `\n` + rows[i]
+                let data = ParseM3u.buildM3uBaseObject(i, rows[i],
+                    "Undefined", "", "", "", "",
+                    name, originalData, raw)
+                result.push(data)
+            }
+        }
+        if (result.length == 0) {
+            return []
+        }
+        return combine_m3u_list(result)
+    }
+
+    const combine_m3u_list = (rows) => {
+        let body = [];
+        for (let i = 0; i < rows.length; i++) {
+            body.push(rows[i].raw)
+        }
+        return body
+    }
+
+    const isValidUrl = (url) => {
+        const pattern = new RegExp('^(https?:\\/\\/)?' + // 协议
+            '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // 域名
+            '((\\d{1,3}\\.){3}\\d{1,3}))' + // 或者IP地址
+            '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // 端口和路径
+            '(\\?[;&a-z\\d%_.~+=-]*)?' + // 查询字符串
+            '(\\#[-a-z\\d_]*)?$', 'i'); // 锚点
+        return pattern.test(url);
+    }
+
+    // 解析m3u文件，类似 https://xxxx.m3u, https://xxxx.m3u
+    const getBodyTypeM3uList = async (body) => {
+        let rows = body.split(',');
+        let urls = []
+        for (let i = 0; i < rows.length; i++) {
+            if (isValidUrl(rows[i]) && rows[i].includes(".m3u")) {
+                urls.push(rows[i])
+            }
+        }
+        let allRequest = [];
+        for (let i = 0; i < urls.length; i++) {
+            allRequest.push(axios.get(urls[i], { timeout: settings.httpRequestTimeout }))
+        }
+        const results = await Promise.allSettled(allRequest);
+
+        let bodies = []
+        results.forEach((result, index) => {
+            if (result.status === 'fulfilled') {
+                const response = result.value.data;
+                try {
+                    let values = ParseM3u.parseOriginalBodyToList(response)
+                    for (let i = 0; i < values.length; i++) {
+                        bodies.push(values[i])
+                    }
+                } catch (err) {
+                    console.log('err', err)
                 }
             }
-            if (isM3uArr) {
-                return 2// m3u url array
+        })
+        return combine_m3u_list(bodies)
+    }
+
+    // 解析text文件，类似 xxxx, https://xxx.m3u8
+    const getBodyTypeText = async (body) => {
+        try {
+            let result = ParseM3u.parseQuoteFormat(body)
+            return combine_m3u_list(result)
+        } catch (e) {
+            return []
+        }
+    }
+
+    const getBodyType = async (body) => {
+        let arr = [
+            getBodyTypeM3u8List,
+            getBodyTypeM3uList,
+            getBodyTypeText,
+        ]
+        let result = [];
+        let hitValue = false
+        for (const element of arr) {
+            if (!hitValue) {
+                let value = await element(body);
+                if (value.length > 0) {
+                    hitValue = true
+                    result = value
+                }
             }
-            return 3// text 
+        }
+        if (result.length > 0) {
+            let resultStr = '#EXTM3U\n'
+            return resultStr + result.join('\n')
+        } else {
+            return body
         }
     }
 
@@ -312,6 +400,7 @@ export const MainContextProvider = function ({ children }) {
                 index++
             }
         }
+        clearDetailData()
         setShowM3uBody(res)
         parseGroup(res)
         setOriginalM3uBody(bodyStr);
@@ -486,16 +575,16 @@ export const MainContextProvider = function ({ children }) {
         let arr = chunkArray(data, settings.concurrent)
         if (nowMod === 1) {
             console.log("start check")
-            for(let i = 0;i<arr.length;i++) {
+            for (let i = 0; i < arr.length; i++) {
                 let nowData = [];
                 let allRequest = [];
-                for (let j = 0;j<arr[i].length;j++) {
+                for (let j = 0; j < arr[i].length; j++) {
                     nowData.push(arr[i][j])
-                    allRequest.push(axios.get(arr[i][j].url, {timeout:settings.httpRequestTimeout}))
+                    allRequest.push(axios.get(arr[i][j].url, { timeout: settings.httpRequestTimeout }))
                 }
                 const results = await Promise.allSettled(allRequest);
                 console.log("res", results)
-                results.forEach((result,index) => {
+                results.forEach((result, index) => {
                     let videoInfoMap = videoInfoRef.current
                     let one = nowData[index];
                     if (result.status === 'fulfilled') {
@@ -709,7 +798,7 @@ export const MainContextProvider = function ({ children }) {
             pauseCheckUrlData, resumeCheckUrlData, strToCsv, clearDetailData,
             getM3uBody,
             needFastSource, onChangeNeedFastSource, nowMod, getBodyType,
-            nowLanguage, changeLanguage,languageList, nowWindow, clientSaveFile
+            nowLanguage, changeLanguage, languageList, nowWindow, clientSaveFile
         }}>
             {children}
         </MainContext.Provider>

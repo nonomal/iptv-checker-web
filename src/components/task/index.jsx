@@ -43,6 +43,8 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from '@mui/material/FormLabel';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useTranslation, initReactI18next } from "react-i18next";
+import GetAppIcon from '@mui/icons-material/GetApp';
+import PublishIcon from '@mui/icons-material/Publish';
 
 const run_type_list = [{ "value": "EveryDay", "name": "每天" }, { "value": "EveryHour", "name": "每小时" }]
 const output_folder = "static/output/"
@@ -910,23 +912,57 @@ export default function TaskList(props) {
         get_task_list()
     }
 
+    const exportTask = () => {
+
+    }
+
+    const importTask = () => {
+
+    }
+
     return (
         <Box style={{padding: '0 20px'}}>
             {
                 privateHost || _mainContext.nowMod === 0 ? (
             <>
-            <Box style={{marginBottom: '10px'}}>
-                <Button 
-                variant="contained" 
-                startIcon={<AddIcon />} 
-                onClick={() => handleClickOpen(null)}
-                style={{marginRight: '10px'}}
-                >{t('新增')}</Button>
-                <Button 
-                variant="outlined" 
-                startIcon={<RefreshIcon />} 
-                onClick={() => refreshList()}
-                >{t('刷新列表')}</Button>
+            <Box style={{
+                marginBottom: '10px',
+                display: 'flex',
+                justifyContent: 'space-between'}}>
+                <div>
+                    <Button 
+                        variant="contained" 
+                        startIcon={<AddIcon />} 
+                        onClick={() => handleClickOpen(null)}
+                        style={{marginRight: '10px'}}
+                        >
+                            {t('新增')}
+                    </Button>
+                    <Button 
+                        variant="outlined" 
+                        startIcon={<RefreshIcon />} 
+                        onClick={() => refreshList()}
+                        >
+                            {t('刷新列表')}
+                    </Button>
+                </div>
+                <div>
+                    <Button 
+                        variant="outlined" 
+                        startIcon={<PublishIcon />} 
+                        style={{marginRight: '10px'}}
+                        onClick={() => importTask()}
+                        >
+                        {t('任务导入')}
+                    </Button>
+                    <Button 
+                        variant="outlined" 
+                        startIcon={<GetAppIcon />} 
+                        onClick={() => exportTask()}
+                        >
+                        {t('全部任务导出')}
+                    </Button>
+                </div>
             </Box>
             <Snackbar
                 open={openAlertBar}

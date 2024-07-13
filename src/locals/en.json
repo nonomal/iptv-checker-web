@@ -105,6 +105,8 @@
       "检测并发数":"Check concurrency",
       "检查超时时间（毫秒）":"Check timeout (milliseconds)",
       "保存":"Save",
+      "任务导入":"Import tasks",
+      "全部任务导出":"Export all tasks",
       "刷新列表":"Refresh",
       "下一步":"Next Step",
       "输入框支持下面几种格式":"The input box supports the following formats",

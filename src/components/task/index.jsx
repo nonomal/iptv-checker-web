@@ -867,7 +867,6 @@ export default function TaskList(props) {
 
     const get_task_list = () => {
         let url = getHost()+"/tasks/list?page=1"
-        console.log(url)
         axios.get(url).then(res => {
             setTaskList(res.data.list)
         }).catch(e => {

@@ -38,33 +38,14 @@ export const VideoJS = (props) => {
         videojs.log('player is ready');
         onReady && onReady(player);
       });
-      // console.log(player.isFullscreen())
-      // player.requestFullscreen()
-      // player.on("fullscreenchange", function(e) {
-      //   console.log(e)
-      // })
       if (typeof player.httpSourceSelector === "function" && player) {
-        console.log("---httpSourceSelector")
         player.httpSourceSelector();
       }
-      // let qualityLevels = player.qualityLevels();
-      // console.log("---qualityLevels", qualityLevels)
-      // qualityLevels.selectedIndex_ = 0;
-      // qualityLevels.trigger({ type: 'change', selectedIndex: 0 });
-
-      // You could update an existing player in the `else` block here
-      // on prop change, for example:
     } else {
       const player = playerRef.current;
       if (typeof player.httpSourceSelector === "function" && player) {
-        console.log("---httpSourceSelector")
         player.httpSourceSelector();
       }
-      // let qualityLevels = player.qualityLevels();
-      // console.log("---qualityLevels", qualityLevels)
-      // qualityLevels.selectedIndex_ = 0;
-      // qualityLevels.trigger({ type: 'change', selectedIndex: 0 });
-
       player.autoplay(options.autoplay);
       player.src(options.sources);
     }

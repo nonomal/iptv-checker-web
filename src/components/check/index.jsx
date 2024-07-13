@@ -40,35 +40,11 @@ export default function Check() {
         setShowError(false)
     }
 
-    const parseOnlineData = async (selectedUrl) => {
-        let targetUrl = [];
-        for (let i = 0; i < selectedUrl.length; i++) {
-          for (let j = 0; j < selectedUrl[i].length; j++) {
-            targetUrl.push(selectedUrl[i][j])
-          }
-        }
-        console.log(targetUrl)
-        let bodies = []
-        if (targetUrl.length == 0) {
-          return bodies
-        }
-        for (let i = 0; i < targetUrl.length; i++) {
-          if (utils.isValidUrl(targetUrl[i])) {
-            let res = await axios.get(_mainContext.getM3uBody(targetUrl[i]))
-            if (res.status === 200) {
-              bodies.push(res.data)
-            }
-          }
-        }
-        return bodies
-      }
-
     const handleConfirm = async () => {
         setLoading(true);
         let bodyStr = body.trim()
         try {
             bodyStr = await _mainContext.getBodyType(bodyStr)
-            console.log(bodyStr)
             _mainContext.changeOriginalM3uBody(bodyStr)
             navigate("/detail")
         } catch (e) {

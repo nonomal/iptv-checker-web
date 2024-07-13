@@ -128,7 +128,6 @@ export default function Settings() {
 
     const saveSource = (val) => {
         let oriArr = customLink
-        console.log(oriArr, val)
         let arr = val.split('\n')
         if (arr.length > 0) {
             for (let i = 0; i < arr.length; i++) {

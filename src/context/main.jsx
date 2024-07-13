@@ -583,7 +583,6 @@ export const MainContextProvider = function ({ children }) {
                     allRequest.push(axios.get(arr[i][j].url, { timeout: settings.httpRequestTimeout }))
                 }
                 const results = await Promise.allSettled(allRequest);
-                console.log("res", results)
                 results.forEach((result, index) => {
                     let videoInfoMap = videoInfoRef.current
                     let one = nowData[index];

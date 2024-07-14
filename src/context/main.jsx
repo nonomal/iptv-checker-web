@@ -557,11 +557,23 @@ export const MainContextProvider = function ({ children }) {
         if (nowMod === 1) {
             console.log("start check")
             for (let i = 0; i < arr.length; i++) {
+                if (nowCheckUrlModRef.current === 2) {
+                    continue
+                }
                 let nowData = [];
                 let allRequest = [];
                 for (let j = 0; j < arr[i].length; j++) {
+                    let nowItem = arr[i][j]
+                    let getData = findM3uBodyByIndex(nowItem.index)
+                    if (getData.status !== 0) {
+                        log("do check status != 0")
+                        continue
+                    }
                     nowData.push(arr[i][j])
                     allRequest.push(axios.get(arr[i][j].url, { timeout: settings.httpRequestTimeout }))
+                }
+                if(allRequest.length == 0) {
+                    continue
                 }
                 const results = await Promise.allSettled(allRequest);
                 results.forEach((result, index) => {
@@ -606,14 +618,28 @@ export const MainContextProvider = function ({ children }) {
             }
             console.log("end check")
         } else {
+            console.log("start server check")
             for (let i = 0; i < arr.length; i++) {
+                console.log("----now", arr[i])
+                if (nowCheckUrlModRef.current === 2) {
+                    continue
+                }
                 let nowData = [];
                 let allRequest = [];
                 
                 for (let j = 0; j < arr[i].length; j++) {
+                    let nowItem = arr[i][j]
+                    let getData = findM3uBodyByIndex(nowItem.index)
+                    if (getData.status !== 0) {
+                        log("do check status != 0")
+                        continue
+                    }
                     nowData.push(arr[i][j])
                     let _url = getCheckUrl(arr[i][j].url, settings.httpRequestTimeout)
                     allRequest.push(axios.get(_url, { timeout: settings.httpRequestTimeout }))
+                }
+                if(allRequest.length == 0) {
+                    continue
                 }
                 const results = await Promise.allSettled(allRequest);
                 results.forEach((result, index) => {

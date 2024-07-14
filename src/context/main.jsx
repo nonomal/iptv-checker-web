@@ -167,7 +167,8 @@ export const MainContextProvider = function ({ children }) {
         }
         let allRequest = [];
         for (let i = 0; i < urls.length; i++) {
-            allRequest.push(axios.get(urls[i], { timeout: settings.httpRequestTimeout }))
+            let _url = getM3uBody(urls[i])
+            allRequest.push(axios.get(_url, { timeout: settings.httpRequestTimeout }))
         }
         const results = await Promise.allSettled(allRequest);
 
@@ -531,26 +532,6 @@ export const MainContextProvider = function ({ children }) {
 
     const prepareCheckData = () => {
         let _temp = deepCopyJson(showM3uBody)
-        // let _tempMap = {}
-        // for (let i = 0; i < _temp.length; i++) {
-        //     let hostName = parseUrlHost(_temp[i].url)
-        //     if (_tempMap[hostName] === undefined) {
-        //         _tempMap[hostName] = []
-        //     }
-        //     _tempMap[hostName].push(_temp[i])
-        // }
-        // let maxId = 0;
-        // for (const key in _tempMap) {
-        //     maxId = maxId > _tempMap[key].length ? maxId : _tempMap[key].length
-        // }
-        // let randomArr = [];
-        // for (let i = 0; i < maxId; i++) {
-        //     for (const key in _tempMap) {
-        //         if (_tempMap[key][i] !== undefined) {
-        //             randomArr.push(_tempMap[key][i]);
-        //         }
-        //     }
-        // }
         setCheckData(_temp)
         return _temp
     }
@@ -626,20 +607,22 @@ export const MainContextProvider = function ({ children }) {
             console.log("end check")
         } else {
             for (let i = 0; i < arr.length; i++) {
-                if (nowCheckUrlModRef.current === 2) {
-                    continue
+                let nowData = [];
+                let allRequest = [];
+                
+                for (let j = 0; j < arr[i].length; j++) {
+                    nowData.push(arr[i][j])
+                    let _url = getCheckUrl(arr[i][j].url, settings.httpRequestTimeout)
+                    allRequest.push(axios.get(_url, { timeout: settings.httpRequestTimeout }))
                 }
-                let one = data[i]
-                let getData = findM3uBodyByIndex(one.index)
-                if (getData.status !== 0) {
-                    log("do check status != 0")
-                    continue
-                }
-                try {
-                    let _url = getCheckUrl(one.url, settings.httpRequestTimeout)
-                    let res = await axios.get(_url)
-                    log(res.data.video)
-                    if (res.status === 200) {
+                const results = await Promise.allSettled(allRequest);
+                results.forEach((result, index) => {
+                    let videoInfoMap = videoInfoRef.current
+                    let one = nowData[index];
+                    if (result.status === 'fulfilled') {
+                        const res = result.value;
+                        console.log("resp", res);
+                        let delay = res.data.delay;
                         let videoInfoMap = videoInfoRef.current
                         videoInfoMap[one.url] = {
                             "video": res.data.video,
@@ -652,41 +635,92 @@ export const MainContextProvider = function ({ children }) {
                         if (videoFastNameMap[one.sName] === undefined || videoFastNameMap[one.sName] === null) {
                             videoFastNameMap[one.sName] = {
                                 index: one.index,
-                                delay: res.data.delay
+                                delay: delay
                             }
                         } else {
-                            if (videoFastNameMap[one.sName].delay >= res.data.delay) {
+                            if (videoFastNameMap[one.sName].delay >= delay) {
                                 videoFastNameMap[one.sName] = {
                                     index: one.index,
-                                    delay: res.data.delay
+                                    delay: delay
                                 }
                             }
                         }
-                        setShowM3uBodyStatus(one.index, 1, res.data.video, res.data.audio, res.data.delay)
+                        setShowM3uBodyStatus(one.index, 1, null, null, delay)
                         setCheckDataStatus(one.index, 1)
                     } else {
-                        let videoInfoMap = videoInfoRef.current
                         videoInfoMap[one.url] = {
                             "status": 2,
                         }
                         setShowM3uBodyStatus(one.index, 2, null, null, 0)
                         setCheckDataStatus(one.index, 2)
                     }
-                    hasCheckedCountRef.current += 1
-                    setHasCheckedCount(hasCheckedCountRef.current)
-                } catch (e) {
-                    log(e)
-                    setShowM3uBodyStatus(one.index, 2, null, null, 0)
-                    let videoInfoMap = videoInfoRef.current
-                    videoInfoMap[one.url] = {
-                        "status": 2,
-                    }
-                    hasCheckedCountRef.current += 1
-                    setHasCheckedCount(hasCheckedCountRef.current)
-                }
-                await sleep(settings.checkSleepTime)
+                });
+                hasCheckedCountRef.current += settings.concurrent
+                setHasCheckedCount(hasCheckedCountRef.current)
             }
+            // for (let i = 0; i < arr.length; i++) {
+            //     if (nowCheckUrlModRef.current === 2) {
+            //         continue
+            //     }
+            //     let one = data[i]
+            //     let getData = findM3uBodyByIndex(one.index)
+            //     if (getData.status !== 0) {
+            //         log("do check status != 0")
+            //         continue
+            //     }
+            //     try {
+            //         let _url = getCheckUrl(one.url, settings.httpRequestTimeout)
+            //         let res = await axios.get(_url)
+            //         log(res.data.video)
+            //         if (res.status === 200) {
+            //             let videoInfoMap = videoInfoRef.current
+            //             videoInfoMap[one.url] = {
+            //                 "video": res.data.video,
+            //                 "audio": res.data.audio,
+            //                 "videoType": ParseM3u.getVideoResolution(res.data.video.width, res.data.video.height),
+            //                 "status": 1,
+            //                 'delay': res.data.delay,
+            //             }
+            //             let videoFastNameMap = videoFastNameMapRef.current
+            //             if (videoFastNameMap[one.sName] === undefined || videoFastNameMap[one.sName] === null) {
+            //                 videoFastNameMap[one.sName] = {
+            //                     index: one.index,
+            //                     delay: res.data.delay
+            //                 }
+            //             } else {
+            //                 if (videoFastNameMap[one.sName].delay >= res.data.delay) {
+            //                     videoFastNameMap[one.sName] = {
+            //                         index: one.index,
+            //                         delay: res.data.delay
+            //                     }
+            //                 }
+            //             }
+            //             setShowM3uBodyStatus(one.index, 1, res.data.video, res.data.audio, res.data.delay)
+            //             setCheckDataStatus(one.index, 1)
+            //         } else {
+            //             let videoInfoMap = videoInfoRef.current
+            //             videoInfoMap[one.url] = {
+            //                 "status": 2,
+            //             }
+            //             setShowM3uBodyStatus(one.index, 2, null, null, 0)
+            //             setCheckDataStatus(one.index, 2)
+            //         }
+            //         hasCheckedCountRef.current += 1
+            //         setHasCheckedCount(hasCheckedCountRef.current)
+            //     } catch (e) {
+            //         console.log("axios err", e)
+            //         setShowM3uBodyStatus(one.index, 2, null, null, 0)
+            //         let videoInfoMap = videoInfoRef.current
+            //         videoInfoMap[one.url] = {
+            //             "status": 2,
+            //         }
+            //         hasCheckedCountRef.current += 1
+            //         setHasCheckedCount(hasCheckedCountRef.current)
+            //     }
+            //     await sleep(settings.checkSleepTime)
+            // }
         }
+        return true
     }
 
     const setCheckDataIsFinished = () => {
@@ -708,7 +742,7 @@ export const MainContextProvider = function ({ children }) {
         nowCheckUrlModRef.current = 1
         setHandleMod(1)
         let data = prepareCheckData()
-        await doCheck(data)
+        let _ = await doCheck(data)
         setCheckDataIsFinished()
     }
 

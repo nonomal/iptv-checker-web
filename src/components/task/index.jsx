@@ -9,6 +9,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Button from '@mui/material/Button';
+import DialogTitle from '@mui/material/DialogTitle';
 import Paper from '@mui/material/Paper';
 import axios from 'axios'
 import Collapse from '@mui/material/Collapse';
@@ -631,6 +632,8 @@ function Row(props) {
                     <div>{t('最后一次运行时间')}：{row.task_info.last_run_time > 0 ? (new Date(row.task_info.last_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''} </div>
                     <div>{t('下一次运行时间')}：{row.task_info.next_run_time > 0 ? (new Date(row.task_info.next_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''} </div>
                     <div>{t('运行类型')}：{row.task_info.run_type} </div>
+                    <div>{t('是否不需要检查')}：{row.task_info.no_check? t('是'):t('否')} </div>
+                    <div>{t('是否需要排序')}：{row.task_info.sort?t('是'):t('否')} </div>
                 </TableCell>
             </TableRow>
             <TableRow>
@@ -754,6 +757,64 @@ function DownloadDialog(props) {
     );
 }
 
+function ImportDialog(props) {
+    const { t } = useTranslation();
+    const { onClose, open,onSave } = props;
+
+    const [body, setBody] = React.useState('');
+
+    const handleClose = () => {
+        setBody('')
+        onClose(false);
+    };
+
+    const saveImport = () => {
+        onSave(body)
+    }
+
+    const changeValue = (e) => {
+        setBody(e.target.value)
+    }
+
+    return (
+        <Dialog onClose={handleClose} open={open}>
+            <Box sx={{width: 500, padding:'20px'}}>
+            <TextField
+                id="outlined-multiline-flexible"
+                multiline
+                value={body}
+                maxRows={4}
+                style={{width:'500px'}}
+                onChange={changeValue}
+                />
+            </Box>
+            <Button variant="text" onClick={() => saveImport()}>{t('导入')}</Button>
+        </Dialog>
+    )
+}
+
+function ExportDialog(props) {
+    const { onClose, formValue, open } = props;
+
+    const handleClose = () => {
+        onClose(false);
+    };
+
+    return (
+        <Dialog onClose={handleClose} open={open}>
+            <Box sx={{width: 500, padding:'20px'}}>
+            <TextField
+                id="outlined-multiline-flexible"
+                multiline
+                value={formValue}
+                maxRows={4}
+                style={{width:'500px'}}
+                />
+            </Box>
+        </Dialog>
+    )
+}
+
 export default function TaskList(props) {
     const _mainContext = useContext(MainContext);
 
@@ -785,6 +846,9 @@ export default function TaskList(props) {
     const [openDownloadBody, setOpenDownloadBody] = React.useState(false)
     const [downloadBody, setDownloadBody] = React.useState({ "content": "", "url": "" })
     const [privateHost, setPrivateHost] = React.useState('')
+    const [showImportDialog, setShowImportDialog] = React.useState(false)
+    const [showExportDialog, setShowExportDialog] = React.useState(false)
+    const [exportBody, setExportBody] = React.useState('')
 
     const handleClickOpen = (value) => {
         setFormValue(value)
@@ -911,13 +975,37 @@ export default function TaskList(props) {
         get_task_list()
     }
 
-    const exportTask = () => {
-
+    const handleImportDialog = (val) => {
+        setShowImportDialog(val)
     }
 
-    const importTask = () => {
-
+    const handleExportDialog = (val) => {
+        if(val) {
+            axios.get(getHost()+"/system/tasks/export").then(res => {
+                setShowExportDialog(true)
+                setExportBody(JSON.stringify(res.data))
+            }).catch(e => {
+                handleOpenAlertBar(t('获取失败'))
+            })
+        }else{
+            setShowExportDialog(false)
+        }
     }
+
+    const handleSaveImportData = (val) =>  {
+        try{
+            let data = JSON.parse(val)
+            axios.post(getHost()+"/system/tasks/import", data).then(res => {
+                setShowImportDialog(false)
+                refreshList()
+            }).catch(e => {
+                handleOpenAlertBar(t('保存失败'))
+            })
+        }catch(e) {
+            console.log(e)
+            handleOpenAlertBar(t('非法参数'))
+        }
+    } 
 
     return (
         <Box style={{padding: '0 20px'}}>
@@ -950,14 +1038,14 @@ export default function TaskList(props) {
                         variant="outlined" 
                         startIcon={<PublishIcon />} 
                         style={{marginRight: '10px'}}
-                        onClick={() => importTask()}
+                        onClick={() => handleImportDialog(true)}
                         >
                         {t('任务导入')}
                     </Button>
                     <Button 
                         variant="outlined" 
                         startIcon={<GetAppIcon />} 
-                        onClick={() => exportTask()}
+                        onClick={() => handleExportDialog(true)}
                         >
                         {t('全部任务导出')}
                     </Button>
@@ -981,6 +1069,16 @@ export default function TaskList(props) {
                 open={openDownloadBody}
                 onClose={() => handleDownloadClose(false)}
             />
+            <ImportDialog 
+                open={showImportDialog} 
+                onClose={() => handleImportDialog(false)}
+                onSave={handleSaveImportData}
+                ></ImportDialog>
+            <ExportDialog 
+            open={showExportDialog} 
+            formValue={exportBody}
+            onClose={() => handleExportDialog(false)}
+            ></ExportDialog>
             {
                 _mainContext.nowMod === 1 ? (
                     <p>{t('当前设置的【后台检查server域名】为')}：{privateHost}</p>

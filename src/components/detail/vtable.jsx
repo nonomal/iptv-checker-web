@@ -129,11 +129,9 @@ class MuiVirtualizedTable extends React.PureComponent {
                         <Box>
                             {
                                 originalData[this.getObjectIndexIndex(cellData)].status === 0 ? (
-                                    <Tooltip title={t('未检查')}>
-                                        <Avatar sx={{ width: 24, height: 24 }}>
-                                            <HorizontalRuleIcon />
-                                        </Avatar>
-                                    </Tooltip>
+                                    <Avatar sx={{ width: 24, height: 24 }}>
+                                        <HorizontalRuleIcon />
+                                    </Avatar>
                                 ) : ''
                             }
                             {
@@ -144,22 +142,18 @@ class MuiVirtualizedTable extends React.PureComponent {
                                                 fontWeight: "bold",
                                             }}>{originalData[this.getObjectIndexIndex(cellData)].delay}ms</div>
                                         ):(
-                                            <Tooltip title={t('有效')}>
-                                                <Avatar sx={{ bgcolor: green[500], width: 24, height: 24 }}>
-                                                    <TagFacesIcon />
-                                                </Avatar>
-                                            </Tooltip>
+                                            <Avatar sx={{ bgcolor: green[500], width: 24, height: 24 }}>
+                                                <TagFacesIcon />
+                                            </Avatar>
                                         )
                                     
                                 ) : ''
                             }
                             {
                                 originalData[this.getObjectIndexIndex(cellData)].status === 2 ? (
-                                    <Tooltip title={t('无效')}>
-                                        <Avatar sx={{ bgcolor: pink[500], width: 24, height: 24 }}>
-                                            <SentimentVeryDissatisfiedIcon />
-                                        </Avatar>
-                                    </Tooltip>
+                                    <Avatar sx={{ bgcolor: pink[500], width: 24, height: 24 }}>
+                                        <SentimentVeryDissatisfiedIcon />
+                                    </Avatar>
                                 ) : ''
                             }
                         </Box>

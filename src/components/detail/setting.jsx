@@ -81,7 +81,6 @@ export default function Setting(props) {
     }
 
     useEffect(() => {
-        console.log(window.location)
         initVideoResolution()
     }, [])
 
@@ -203,7 +202,7 @@ export default function Setting(props) {
             position: 'fixed',
             width: 'calc(100% - 290px)',
             borderBottom: '1px solid #eee',
-            top: 0,
+            top: _mainContext.nowMod === 1 ? '30px':0,
             left: 290,
             zIndex: 999,
             padding: '8px',

@@ -91,7 +91,7 @@ const ParseM3u = {
             if (arr[i] !== "") {
                 let item = arr[i].split(",")
                 if (item !== "") {
-                    if (item.length >= 2 && ParseM3u.checkStrIsLink(item[1])) {
+                    if (item.length >= 2 && ParseM3u.checkStrIsLink(item[1]) && !ParseM3u.checkStrIsLink(item[0])) {
                         let originalData = `#EXTINF:-1 tvg-id="" tvg-logo="" group-title="Undefined",` + item[0] + `\n` + item[1]
                         let raw = `#EXTINF:-1 tvg-id="" tvg-logo="" group-title="Undefined",` + item[0] + `\n` + item[1]
                         let data = this.buildM3uBaseObject(i+1, item[1],

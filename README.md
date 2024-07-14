@@ -8,8 +8,23 @@ iptv-checker的web界面
 
 如果基于源码启动`npm run dev`时,出现`No matching export in "node_modules/react-virtualized/dist/es/WindowScroller/WindowScroller.js" for import "bpfrpt_proptype_WindowScroller"` 这样的错误，请输入`npx patch-package`可解决
 
+windows提示：无法加载文件 C:\Program Files\nodejs\npm.ps1，因为在此系统上禁止运行脚本, 解决：```Set-ExecutionPolicy RemoteSigned -Scope CurrentUser```
+
+windows提示：ENOENT: no such file or directory, lstat 'C:\Users\pc\AppData\Roaming\npm'， 解决：
+cd 到对应目录（C:\Users\pc\AppData\Roaming\），创建npm文件夹即可
+
+
 ## web变更日志
 
+- v4.0.1
+  - bug修复
+    - 检测源输入框无法识别数据问题
+    - 桌面版检查详情页无法拖动问题
+    - 桌面版检查详情页在线播放体验优化
+    - 检查数据后再通过公共订阅源菜单进入检查详情页会出现检查设置菜单还是上一次状态
+    - 修复源检测无法暂停、检查失败的问题
+  - 后台任务支持导出、导入
+  - 后台任务增加不检查任务
 - v4.0.0
   - UI界面大更新
   - 支持windows && mac os && linux 桌面端

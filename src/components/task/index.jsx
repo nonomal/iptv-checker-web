@@ -9,6 +9,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Button from '@mui/material/Button';
+import DialogTitle from '@mui/material/DialogTitle';
 import Paper from '@mui/material/Paper';
 import axios from 'axios'
 import Collapse from '@mui/material/Collapse';
@@ -43,6 +44,8 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormLabel from '@mui/material/FormLabel';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useTranslation, initReactI18next } from "react-i18next";
+import GetAppIcon from '@mui/icons-material/GetApp';
+import PublishIcon from '@mui/icons-material/Publish';
 
 const run_type_list = [{ "value": "EveryDay", "name": "每天" }, { "value": "EveryHour", "name": "每小时" }]
 const output_folder = "static/output/"
@@ -60,6 +63,7 @@ const defaultValue = {
         "check_timeout": 20000,
         "concurrent": 30,
         "sort": false,
+        "no_check": false,
     },
     "id": "",
     "create_time": 0,
@@ -136,6 +140,7 @@ function TaskForm(props) {
             formValue.original.check_timeout = formValue.original.check_timeout ?? 0;
             formValue.original.concurrent = formValue.original.concurrent ?? 0;
             formValue.original.sort = formValue.original.sort ?? false;
+            formValue.original.no_check = formValue.original.no_check ?? false;
             setTask(formValue)
         } else {
             let default_data = JSON.parse(JSON.stringify(defaultValue))
@@ -306,6 +311,22 @@ function TaskForm(props) {
             original: {
                 ...task.original,
                 http_timeout: parseInt(e.target.value, 10)
+            }
+        });
+    }
+
+    const handleChangeNoCheckValue = (e) => {
+        let checked = false
+        if (e.target.defaultValue === "false") {
+            checked = false
+        } else {
+            checked = true
+        }
+        setTask({
+            ...task,
+            original: {
+                ...task.original,
+                no_check: checked
             }
         });
     }
@@ -509,7 +530,9 @@ function TaskForm(props) {
                                 startIcon={<MoodBadIcon />}>{t('添加不看')}</Button>
                         </Stack>
                     </FormControl>
-                    <FormControl>
+                    <FormControl fullWidth style={{
+                        margin: "20px 0 20px",
+                    }}>
                         <FormLabel id="demo-row-radio-buttons-group-label">{t('是否需要排序')}</FormLabel>
                         <RadioGroup
                             row
@@ -517,6 +540,21 @@ function TaskForm(props) {
                             name="row-radio-buttons-group"
                             value={task.original.sort}
                             onChange={handleChangeSortValue}
+                        >
+                            <FormControlLabel value="false" control={<Radio />} label={t('否')} />
+                            <FormControlLabel value="true" control={<Radio />} label={t('是')} />
+                        </RadioGroup>
+                    </FormControl>
+                    <FormControl fullWidth style={{
+                        margin: "20px 0 20px",
+                    }}>
+                        <FormLabel id="demo-row-radio-buttons-group-label">{t('是否不需要检查')}</FormLabel>
+                        <RadioGroup
+                            row
+                            aria-labelledby="demo-row-radio-buttons-group-label"
+                            name="row-radio-buttons-group"
+                            value={task.original.no_check}
+                            onChange={handleChangeNoCheckValue}
                         >
                             <FormControlLabel value="false" control={<Radio />} label={t('否')} />
                             <FormControlLabel value="true" control={<Radio />} label={t('是')} />
@@ -594,6 +632,8 @@ function Row(props) {
                     <div>{t('最后一次运行时间')}：{row.task_info.last_run_time > 0 ? (new Date(row.task_info.last_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''} </div>
                     <div>{t('下一次运行时间')}：{row.task_info.next_run_time > 0 ? (new Date(row.task_info.next_run_time * 1000).toLocaleTimeString('zh-CN', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })) : ''} </div>
                     <div>{t('运行类型')}：{row.task_info.run_type} </div>
+                    <div>{t('是否不需要检查')}：{row.task_info.no_check? t('是'):t('否')} </div>
+                    <div>{t('是否需要排序')}：{row.task_info.sort?t('是'):t('否')} </div>
                 </TableCell>
             </TableRow>
             <TableRow>
@@ -717,21 +757,85 @@ function DownloadDialog(props) {
     );
 }
 
+function ImportDialog(props) {
+    const { t } = useTranslation();
+    const { onClose, open,onSave } = props;
+
+    const [body, setBody] = React.useState('');
+
+    const handleClose = () => {
+        setBody('')
+        onClose(false);
+    };
+
+    const saveImport = () => {
+        onSave(body)
+    }
+
+    const changeValue = (e) => {
+        setBody(e.target.value)
+    }
+
+    return (
+        <Dialog onClose={handleClose} open={open}>
+            <Box sx={{width: 500, padding:'20px'}}>
+            <TextField
+                id="outlined-multiline-flexible"
+                multiline
+                value={body}
+                maxRows={4}
+                style={{width:'500px'}}
+                onChange={changeValue}
+                />
+            </Box>
+            <Button variant="text" onClick={() => saveImport()}>{t('导入')}</Button>
+        </Dialog>
+    )
+}
+
+function ExportDialog(props) {
+    const { onClose, formValue, open } = props;
+
+    const handleClose = () => {
+        onClose(false);
+    };
+
+    return (
+        <Dialog onClose={handleClose} open={open}>
+            <Box sx={{width: 500, padding:'20px'}}>
+            <TextField
+                id="outlined-multiline-flexible"
+                multiline
+                value={formValue}
+                maxRows={4}
+                style={{width:'500px'}}
+                />
+            </Box>
+        </Dialog>
+    )
+}
+
 export default function TaskList(props) {
     const _mainContext = useContext(MainContext);
 
     const privateHostRef = useRef("")
     const { t } = useTranslation();
     useEffect(() => {
-        let config = _mainContext.settings
-        if(config !== null) {
-            if(config.privateHost !== '') {
-                setPrivateHost(config.privateHost)
-                privateHostRef.current = config.privateHost
-                get_task_list()
+        if(_mainContext.nowMod === 1) {
+            let config = _mainContext.settings
+            if(config !== null) {
+                if(config.privateHost !== '') {
+                    setPrivateHost(config.privateHost)
+                    privateHostRef.current = config.privateHost
+                    get_task_list()
+                }
             }
         }
     }, [_mainContext])
+
+    useEffect(() => {
+        get_task_list()
+    }, [])
 
     const [formDialog, setFormDialog] = React.useState(false);
     const [formValue, setFormValue] = React.useState(null);
@@ -742,6 +846,9 @@ export default function TaskList(props) {
     const [openDownloadBody, setOpenDownloadBody] = React.useState(false)
     const [downloadBody, setDownloadBody] = React.useState({ "content": "", "url": "" })
     const [privateHost, setPrivateHost] = React.useState('')
+    const [showImportDialog, setShowImportDialog] = React.useState(false)
+    const [showExportDialog, setShowExportDialog] = React.useState(false)
+    const [exportBody, setExportBody] = React.useState('')
 
     const handleClickOpen = (value) => {
         setFormValue(value)
@@ -773,6 +880,7 @@ export default function TaskList(props) {
             "http_timeout": value.original.http_timeout,
             "check_timeout": value.original.check_timeout,
             "sort": value.original.sort,
+            "no_check": value.original.no_check,
             "concurrent": value.original.concurrent,
         }
     }
@@ -790,7 +898,11 @@ export default function TaskList(props) {
     }
 
     const getHost = () => {
-        return privateHostRef.current
+        if(_mainContext.nowMod === 0) {
+            return ''
+        }else{
+            return privateHostRef.current
+        }
     }
 
     const task_add = (value) => {
@@ -819,7 +931,6 @@ export default function TaskList(props) {
 
     const get_task_list = () => {
         let url = getHost()+"/tasks/list?page=1"
-        console.log(url)
         axios.get(url).then(res => {
             setTaskList(res.data.list)
         }).catch(e => {
@@ -864,23 +975,81 @@ export default function TaskList(props) {
         get_task_list()
     }
 
+    const handleImportDialog = (val) => {
+        setShowImportDialog(val)
+    }
+
+    const handleExportDialog = (val) => {
+        if(val) {
+            axios.get(getHost()+"/system/tasks/export").then(res => {
+                setShowExportDialog(true)
+                setExportBody(JSON.stringify(res.data))
+            }).catch(e => {
+                handleOpenAlertBar(t('获取失败'))
+            })
+        }else{
+            setShowExportDialog(false)
+        }
+    }
+
+    const handleSaveImportData = (val) =>  {
+        try{
+            let data = JSON.parse(val)
+            axios.post(getHost()+"/system/tasks/import", data).then(res => {
+                setShowImportDialog(false)
+                refreshList()
+            }).catch(e => {
+                handleOpenAlertBar(t('保存失败'))
+            })
+        }catch(e) {
+            console.log(e)
+            handleOpenAlertBar(t('非法参数'))
+        }
+    } 
+
     return (
         <Box style={{padding: '0 20px'}}>
             {
-                privateHost ? (
+                privateHost || _mainContext.nowMod === 0 ? (
             <>
-            <Box style={{marginBottom: '10px'}}>
-                <Button 
-                variant="contained" 
-                startIcon={<AddIcon />} 
-                onClick={() => handleClickOpen(null)}
-                style={{marginRight: '10px'}}
-                >{t('新增')}</Button>
-                <Button 
-                variant="outlined" 
-                startIcon={<RefreshIcon />} 
-                onClick={() => refreshList()}
-                >{t('刷新列表')}</Button>
+            <Box style={{
+                marginBottom: '10px',
+                display: 'flex',
+                justifyContent: 'space-between'}}>
+                <div>
+                    <Button 
+                        variant="contained" 
+                        startIcon={<AddIcon />} 
+                        onClick={() => handleClickOpen(null)}
+                        style={{marginRight: '10px'}}
+                        >
+                            {t('新增')}
+                    </Button>
+                    <Button 
+                        variant="outlined" 
+                        startIcon={<RefreshIcon />} 
+                        onClick={() => refreshList()}
+                        >
+                            {t('刷新列表')}
+                    </Button>
+                </div>
+                <div>
+                    <Button 
+                        variant="outlined" 
+                        startIcon={<PublishIcon />} 
+                        style={{marginRight: '10px'}}
+                        onClick={() => handleImportDialog(true)}
+                        >
+                        {t('任务导入')}
+                    </Button>
+                    <Button 
+                        variant="outlined" 
+                        startIcon={<GetAppIcon />} 
+                        onClick={() => handleExportDialog(true)}
+                        >
+                        {t('全部任务导出')}
+                    </Button>
+                </div>
             </Box>
             <Snackbar
                 open={openAlertBar}
@@ -900,7 +1069,21 @@ export default function TaskList(props) {
                 open={openDownloadBody}
                 onClose={() => handleDownloadClose(false)}
             />
-            <p>{t('当前设置的【后台检查server域名】为')}：{privateHost}</p>
+            <ImportDialog 
+                open={showImportDialog} 
+                onClose={() => handleImportDialog(false)}
+                onSave={handleSaveImportData}
+                ></ImportDialog>
+            <ExportDialog 
+            open={showExportDialog} 
+            formValue={exportBody}
+            onClose={() => handleExportDialog(false)}
+            ></ExportDialog>
+            {
+                _mainContext.nowMod === 1 ? (
+                    <p>{t('当前设置的【后台检查server域名】为')}：{privateHost}</p>
+                ):''
+            }
             <Paper sx={{ width: '1024px', overflow: 'hidden' }}>
                 <TableContainer>
                 <Table aria-label="simple table">

@@ -30,7 +30,11 @@
         "unmaximize": true,
         "unminimize": true,
         "startDragging": true,
-        "setFullscreen": true
+        "setFullscreen": true,
+        "create": true
+      },
+      "os": {
+        "all": true
       },
       "dialog": {
         "all": true, 
@@ -105,7 +109,8 @@
         "resizable": true,
         "title": "iptv-checker-desktop",
         "width": 1024,
-        "additionalBrowserArgs": "--disable-web-security"
+        "additionalBrowserArgs": "--disable-web-security",
+        "label":"main"
       }
     ]
   }

@@ -74,11 +74,9 @@ export default function Public() {
     const handleConfirm = async () => { 
         setLoading(true);
         try {
-            let bodies = await parseOnlineData(selectedUrl);
-            if (bodies.length === 0) {
-                throw new Error(t('链接为空'))
-            }
-            _mainContext.changeOriginalM3uBodies(bodies)
+            let str = selectedUrl.join(',')
+            let bodyStr = await _mainContext.getBodyType(str)
+            _mainContext.changeOriginalM3uBody(bodyStr)
             navigate("/detail")
         } catch (e) {
             console.log(e)

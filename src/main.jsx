@@ -14,6 +14,7 @@ import Settings from './components/settings';
 import Task from './components/task';
 import Check from './components/check'
 import Public from './components/public';
+import WatchSingle from './components/watch/single'
 import './utils/i18n';
 
 const router = createBrowserRouter([
@@ -50,6 +51,9 @@ const router = createBrowserRouter([
         element: <Settings />,
       },
     ],
+  },{
+    path: "/watch/single",
+    element: <WatchSingle />,
   }
 ]);
 
@@ -60,12 +64,3 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </MainContextProvider>
   </React.StrictMode>
 )
-// document
-//   .getElementById('titlebar-minimize')
-//   .addEventListener('click', () => appWindow.minimize())
-// document
-//   .getElementById('titlebar-maximize')
-//   .addEventListener('click', () => appWindow.toggleMaximize())
-// document
-//   .getElementById('titlebar-close')
-//   .addEventListener('click', () => appWindow.close())

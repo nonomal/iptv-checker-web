@@ -20,6 +20,7 @@ import _package from './../../../package';
 import { useTranslation, initReactI18next } from "react-i18next";
 import { appWindow } from '@tauri-apps/api/window'
 import Divider from '@mui/material/Divider';
+import _Tabbar from './tabbar'
 
 let menuList = [{
     "name": "检测源",
@@ -130,23 +131,7 @@ export default function Layout() {
                 </List>
             </Box>
             <Box className="container-inner">
-                <div data-tauri-drag-region className="titlebar" style={{display: _mainContext.nowMod !== 1 ? 'none':''}}>
-                    <div className="titlebar-button" id="titlebar-minimize">
-                        <img
-                            src="https://api.iconify.design/mdi:window-minimize.svg"
-                            alt="minimize"
-                        />
-                    </div>
-                    <div className="titlebar-button" id="titlebar-maximize">
-                        <img
-                            src="https://api.iconify.design/mdi:window-maximize.svg"
-                            alt="maximize"
-                        />
-                    </div>
-                    <div className="titlebar-button" id="titlebar-close">
-                        <img src="https://api.iconify.design/mdi:close.svg" alt="close" />
-                    </div>
-                </div>
+                <_Tabbar></_Tabbar>
                 {
                     nowSelectedMenu.showHeader ? (
                         <>

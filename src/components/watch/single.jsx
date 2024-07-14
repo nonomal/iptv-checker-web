@@ -21,7 +21,7 @@ export default function Single() {
             },
             sources: [{
                 src: url,
-                type: 'video/mp2t'
+                type: 'application/x-mpegURL'
             }]
         })
     }

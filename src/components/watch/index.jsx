@@ -19,7 +19,7 @@ export default function Watch() {
     const location = useLocation();
     const [videoJsOptions, setVideoJsOptions] = useState(null)
     const setVideoOptions = (url) => {
-        setVideoJsOptions({
+        let data = {
             autoplay: true,
             controls: true,
             responsive: true,
@@ -32,9 +32,10 @@ export default function Watch() {
             },
             sources: [{
                 src: url,
-                type: 'video/mp2t'
+                type: 'application/x-mpegURL'
             }]
-        })
+        }
+        setVideoJsOptions(data)
     }
     const playerRef = React.useRef(null);
     const [name, setName] = useState('')
@@ -51,7 +52,7 @@ export default function Watch() {
         }
         if (paramsObject["url"] !== undefined) {
             setM3u8Link(paramsObject["url"])
-            onloadM3u8Link()
+            onloadM3u8LinkByUrl(paramsObject["url"])
         }
     }, [])
 
@@ -61,6 +62,13 @@ export default function Watch() {
 
     const onloadM3u8Link = () => {
         setVideoOptions(m3u8Link)
+        if(playerRef.current !== null) {
+            playerRef.current.play()
+        }
+    }
+
+    const onloadM3u8LinkByUrl = (val) => {
+        setVideoOptions(val)
         if(playerRef.current !== null) {
             playerRef.current.play()
         }

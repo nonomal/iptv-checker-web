@@ -8,6 +8,12 @@ iptv-checker的web界面
 
 如果基于源码启动`npm run dev`时,出现`No matching export in "node_modules/react-virtualized/dist/es/WindowScroller/WindowScroller.js" for import "bpfrpt_proptype_WindowScroller"` 这样的错误，请输入`npx patch-package`可解决
 
+windows提示：无法加载文件 C:\Program Files\nodejs\npm.ps1，因为在此系统上禁止运行脚本, 解决：```Set-ExecutionPolicy RemoteSigned -Scope CurrentUser```
+
+windows提示：ENOENT: no such file or directory, lstat 'C:\Users\pc\AppData\Roaming\npm'， 解决：
+cd 到对应目录（C:\Users\pc\AppData\Roaming\），创建npm文件夹即可
+
+
 ## web变更日志
 
 - v4.0.1

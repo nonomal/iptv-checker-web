@@ -645,7 +645,7 @@ export const MainContextProvider = function ({ children }) {
                                 }
                             }
                         }
-                        setShowM3uBodyStatus(one.index, 1, null, null, delay)
+                        setShowM3uBodyStatus(one.index, 1, res.data.video, res.data.audio, res.data.delay)
                         setCheckDataStatus(one.index, 1)
                     } else {
                         videoInfoMap[one.url] = {

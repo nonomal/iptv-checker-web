@@ -10,6 +10,7 @@ import { overrideGlobalXHR } from 'tauri-xhr'
 import { writeTextFile } from '@tauri-apps/api/fs';
 import { save } from '@tauri-apps/api/dialog';
 import { downloadDir } from '@tauri-apps/api/path';
+import { platform } from '@tauri-apps/api/os';
 
 export const MainContextProvider = function ({ children }) {
     const headerHeight = 145
@@ -27,6 +28,7 @@ export const MainContextProvider = function ({ children }) {
     const [nowMod, setNowMod] = useState(0);// 当前运行模式 0服务端模式 1客户端模式
     const [nowLanguage, setNowLanguage] = useState('en')
     const [nowWindow, setNowWindow] = useState({ width: 0, height: 0 })
+    const [nowPlatform, setNowPlatform] = useState('')
     const [languageList, setLanguageList] = useState([{
         'code': 'en',
         "name": "English"
@@ -93,6 +95,9 @@ export const MainContextProvider = function ({ children }) {
             setNowWindow({ width: window.innerWidth, height: window.innerHeight })
         })
         initTitleBar()
+        platform().then(res => {
+            setNowPlatform(res)
+        });
         invoke('now_mod', {}).then((response) => {
             overrideGlobalXHR()
             setNowMod(response)
@@ -857,7 +862,8 @@ export const MainContextProvider = function ({ children }) {
             pauseCheckUrlData, resumeCheckUrlData, strToCsv, clearDetailData,
             getM3uBody,
             needFastSource, onChangeNeedFastSource, nowMod, getBodyType,
-            nowLanguage, changeLanguage, languageList, nowWindow, clientSaveFile
+            nowLanguage, changeLanguage, languageList, nowWindow, clientSaveFile,
+            nowPlatform
         }}>
             {children}
         </MainContext.Provider>

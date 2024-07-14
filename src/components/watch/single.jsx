@@ -1,13 +1,18 @@
 import * as React from 'react';
 import { useContext, useState, useEffect, useRef } from "react"
 import VideoJS from './video'
+import { MainContext } from './../../context/main';
 import _Tabbar from './../layout/tabbar'
-import { appWindow,WebviewWindow } from "@tauri-apps/api/window";
+import { appWindow, WebviewWindow } from "@tauri-apps/api/window";
 import { listen } from "@tauri-apps/api/event";
 
 export default function Single() {
+    const _mainContext = useContext(MainContext);
+    const [nowTry, setNowTry] = useState(false)
     const [videoJsOptions, setVideoJsOptions] = useState(null)
-    const setVideoOptions = (url) => {
+    const setVideoOptions = (url, os_type = 'video/mp2t') => {
+        //let os_type = 'application/x-mpegURL'
+        //console.log(os_type)
         setVideoJsOptions({
             autoplay: true,
             controls: true,
@@ -21,7 +26,7 @@ export default function Single() {
             },
             sources: [{
                 src: url,
-                type: 'application/x-mpegURL'
+                type: os_type
             }]
         })
     }
@@ -33,7 +38,7 @@ export default function Single() {
         const unlisten = await listen('changeWatchUrl', (event) => {
             // event.event 是事件名称 (当你想用一个回调函数处理不同类型的事件时很有用)
             // event.payload 是负载对象
-            if(event.event === 'changeWatchUrl') {
+            if (event.event === 'changeWatchUrl') {
                 setM3u8Link(event.payload.data.url)
                 onloadM3u8Link(event.payload.data.url)
             }
@@ -55,7 +60,15 @@ export default function Single() {
 
     const onloadM3u8Link = (targetUrl) => {
         setVideoOptions(targetUrl)
-        if(playerRef.current !== null) {
+        if (playerRef.current !== null) {
+            playerRef.current.play()
+        }
+    }
+
+    const onloadM3u8LinkTry = (targetUrl) => {
+        setNowTry( true)
+        setVideoOptions(targetUrl, '')
+        if (playerRef.current !== null) {
             playerRef.current.play()
         }
     }
@@ -63,32 +76,34 @@ export default function Single() {
     const handlePlayerReady = (player) => {
         console.log('load video')
         playerRef.current = player;
-  
+
         // You can handle player events here, for example:
         player.on('waiting', () => {
             console.log('player is waiting');
         });
-  
+
         player.on('dispose', () => {
             console.log('player will dispose');
         });
-  
+
         player.on('fullscreen', (e) => {
-          console.log('full s', e)
+            console.log('full s', e)
         })
 
         player.on('error', (e) => {
-            console.log('error', e)
+            if(!nowTry) {
+                onloadM3u8LinkTry(m3u8Link, 'application/x-mpegURL')
+            }
         })
-  
-        player.ready(function() {
-          var fullScreenButton = player.controlBar.fullscreenToggle;
-        
-          fullScreenButton.on('click', function() {
-            appWindow.setFullscreen(true).then(res => {
-              console.log("set full screeen")
+
+        player.ready(function () {
+            var fullScreenButton = player.controlBar.fullscreenToggle;
+
+            fullScreenButton.on('click', function () {
+                appWindow.setFullscreen(true).then(res => {
+                    console.log("set full screeen")
+                });
             });
-          });
         });
     };
 
@@ -97,7 +112,7 @@ export default function Single() {
             <_Tabbar></_Tabbar>
             {
                 videoJsOptions === null ? "" : (
-                    <div style={{paddingTop: '30px'}}>
+                    <div style={{ paddingTop: '30px' }}>
                         <VideoJS options={videoJsOptions} onReady={handlePlayerReady} headers={httpHeaders} />
                     </div>
                 )

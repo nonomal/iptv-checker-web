@@ -33,6 +33,9 @@
         "setFullscreen": true,
         "create": true
       },
+      "os": {
+        "all": true
+      },
       "dialog": {
         "all": true, 
         "ask": true,

@@ -19,6 +19,10 @@ export default function Watch() {
     const location = useLocation();
     const [videoJsOptions, setVideoJsOptions] = useState(null)
     const setVideoOptions = (url) => {
+        let os_type = 'application/x-mpegURL'
+        if (_mainContext.nowPlatform === 'darwin' || _mainContext.nowPlatform === 'ios') {
+            os_type = 'video/mp2t'
+        }
         let data = {
             autoplay: true,
             controls: true,
@@ -32,7 +36,7 @@ export default function Watch() {
             },
             sources: [{
                 src: url,
-                type: 'application/x-mpegURL'
+                type: os_type
             }]
         }
         setVideoJsOptions(data)
@@ -62,14 +66,14 @@ export default function Watch() {
 
     const onloadM3u8Link = () => {
         setVideoOptions(m3u8Link)
-        if(playerRef.current !== null) {
+        if (playerRef.current !== null) {
             playerRef.current.play()
         }
     }
 
     const onloadM3u8LinkByUrl = (val) => {
         setVideoOptions(val)
-        if(playerRef.current !== null) {
+        if (playerRef.current !== null) {
             playerRef.current.play()
         }
     }
